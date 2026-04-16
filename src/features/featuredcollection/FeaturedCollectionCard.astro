@@ -1,0 +1,255 @@
+---
+import { button } from '~/styles.ts';
+
+export interface featuredItem {
+  uppertitle: string;
+  title: string;
+  subtitle: string;
+  buttontext: string[];
+  buttontypes: string[];
+  imageUrl: string;
+  imageclass: string;
+  slug: string;
+}
+
+export interface Props {
+  item: featuredItem;
+  area: "a" | "b" | "c" | "d";
+}
+
+const { item, area } = Astro.props;
+
+
+const layout = {
+
+  a: `
+  md:col-span-2
+  md:row-start-1
+  justify-end
+  relative
+  overflow-hidden
+  `,
+
+  b: `
+  md:col-span-1
+  md:row-start-1
+  `,
+
+  c: `
+  md:col-span-1
+  md:row-start-1
+  `,
+
+  d: `
+  md:col-span-4
+  md:row-start-2
+  flex-row
+  bg-theme-base-600
+  `,
+
+};
+
+const rounding = {
+
+  a: "md:rounded-tr-2xl",
+
+  b: "",
+
+  c: "md:rounded-tl-2xl",
+
+  d: "md:rounded-b-2xl",
+
+};
+---
+
+
+<article
+class={`
+relative
+flex
+overflow-hidden   /* ✨ זה מה שחסר */
+
+
+${area === "d"
+  ? "flex-col md:flex-row-reverse"
+  : "flex-col"
+}
+
+bg-theme-base-50
+text-theme-base-200
+
+${layout[area]}
+${rounding[area]}
+`}
+>
+
+
+{/* -------- AREA A -------- */}
+
+{
+
+area === "a" && (
+
+<>
+<img
+
+src={item.imageUrl}
+
+class="
+absolute
+inset-0
+w-full
+h-full
+object-cover
+opacity-80
+"
+
+/>
+
+<div class="relative p-12 max-w-xl">
+
+<h4 class="text-xl mb-3">
+
+{item.uppertitle}
+
+</h4>
+
+
+<h3 class="text-3xl mb-3">
+
+{item.title}
+
+</h3>
+
+
+<p class="mb-6">
+
+{item.subtitle}
+
+</p>
+
+
+<a href={item.slug}>
+  <button class={`${button({ theme:'light' })}`}>
+    {item.buttontext}
+  </button>
+</a>
+
+</div>
+
+</>
+
+)
+
+}
+
+
+
+{/* -------- AREA B + C -------- */}
+
+{
+
+(area === "b" || area === "c") && (
+
+<>
+
+<img
+
+src={item.imageUrl}
+
+class="
+w-full
+h-1/2
+object-cover
+"
+
+/>
+
+
+<div class="p-6">
+
+<h4 class="mb-2">
+
+{item.uppertitle}
+
+</h4>
+
+
+<h3 class="text-xl mb-2">
+
+{item.title}
+
+</h3>
+
+
+<p class="text-sm opacity-70 mb-4">
+
+{item.subtitle}
+
+</p>
+
+
+<button
+
+class={` ${button({ theme:'ghost' })}`}
+
+>
+
+{item.buttontext}
+
+</button>
+
+</div>
+
+</>
+
+)
+
+}
+
+
+
+{/* -------- AREA D -------- */}
+{
+area === "d" && (
+
+<>
+<div class="md:w-2/3 ">
+<img
+src={item.imageUrl}
+class="
+w-full
+h-auto
+object-cover
+"
+/>
+</div>
+
+
+<div class="md:w-1/3 p-12 flex flex-col justify-center">
+
+<h4 class="mb-2">
+{item.uppertitle}
+</h4>
+
+<h3 class="text-2xl mb-3">
+{item.title}
+</h3>
+
+<p class="text-sm opacity-70 mb-6">
+{item.subtitle}
+</p>
+
+<button class={`${button({ theme:'light' })}`}>
+{item.buttontext}
+</button>
+
+</div>
+
+</>
+
+)
+}
+
+
+</article>

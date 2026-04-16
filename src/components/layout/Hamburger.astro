@@ -1,0 +1,22 @@
+---
+ const hamburger ="flex flex-col justify-between w-16 h-8 cursor-pointer group lg:hidden";
+ const line = "block h-0.5 w-12 bg-white mb-0.5 group-hover:bg-black";
+
+
+---
+<div id="hamburger" class={hamburger}>
+    <span class={line}></span>
+    <span class={line}></span>
+    <span class={line}></span>
+</div>
+
+<script>
+
+  const btn = document.getElementById('hamburger');
+  const nav = document.getElementById('navlinks');
+  btn?.addEventListener('click', () => {
+    nav?.classList.toggle('hidden');
+  });
+</script>
+
+

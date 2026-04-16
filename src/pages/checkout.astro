@@ -1,0 +1,488 @@
+---
+import PrimaryLayout from "~/layouts/PrimaryLayout.astro"
+
+import { loadCartFromCookies }
+  from "~/features/cart/cart.server"
+
+import { Image } from "astro:assets"
+
+const cart =
+  await loadCartFromCookies(Astro.cookies)
+
+const items =
+  cart.items ?? []
+
+const subtotal =
+  items.reduce(
+    (sum, item) =>
+      sum +
+      item.quantity *
+      Number(item.productVariant.product.price),
+
+    0
+  )
+---
+
+<PrimaryLayout title="Checkout">
+
+<section
+  class="
+    site-container
+    py-10
+  "
+>
+
+<div
+  class="
+    grid
+    lg:grid-cols-3
+    gap-10
+  "
+>
+
+<!-- summary -->
+<aside
+  class="
+    order-2
+    lg:order-1
+    bg-base-100
+    p-6
+    rounded-xl
+    h-fit
+    space-y-6
+  "
+>
+
+<h2 class="h3">
+סיכום הזמנה
+</h2>
+
+
+<div class="space-y-4">
+
+{items.map(item => (
+
+<div
+  class="
+    flex
+    gap-4
+    items-center
+  "
+>
+
+<Image
+  src={item.productVariant.product.imageUrl}
+  alt={item.productVariant.product.name}
+  width={70}
+  height={70}
+  class="rounded-lg object-cover "
+/>
+
+<div class="flex-1">
+
+<p class="font-medium">
+
+{item.productVariant.product.name}
+
+</p>
+
+<p class="text-sm opacity-60">
+
+כמות:
+{item.quantity}
+
+</p>
+
+</div>
+
+
+<p>
+
+{(
+Number(
+item.productVariant.product.price
+) *
+item.quantity
+).toFixed(2)} ₪
+
+</p>
+
+</div>
+
+))}
+
+</div>
+
+
+<hr>
+
+
+<div
+  class="
+    flex
+    justify-between
+    font-semibold
+    text-lg
+  "
+>
+
+<span>
+סה״כ
+</span>
+
+<span>
+
+{subtotal.toFixed(2)} ₪
+
+</span>
+
+</div>
+
+</aside>
+
+
+
+<!-- accordion -->
+<div
+  class="
+    order-1
+    lg:order-2
+    lg:col-span-2
+    space-y-4
+  "
+>
+
+<form
+  id="checkout-form"
+  class="space-y-4"
+>
+
+<!-- customer -->
+<details
+  open
+  class="
+    bg-base-100
+    rounded-xl
+    p-6
+  "
+>
+
+<summary
+  class="
+    cursor-pointer
+    font-semibold
+    text-lg
+    mb-4
+  "
+>
+
+פרטי הזמנה
+
+</summary>
+
+
+<div
+  class="
+    grid
+    md:grid-cols-2
+    gap-4
+  "
+>
+
+<input
+  name="name"
+  placeholder="שם מלא"
+  required
+  class="input"
+/>
+
+<input
+  name="phone"
+  placeholder="טלפון"
+  required
+  class="input"
+/>
+
+<input
+  name="email"
+  placeholder="אימייל"
+  required
+  class="input md:col-span-2"
+/>
+
+<textarea
+  name="address"
+  placeholder="כתובת מלאה"
+  required
+  class="
+    textarea
+    md:col-span-2
+  "
+></textarea>
+
+</div>
+
+</details>
+
+
+
+<!-- shipping -->
+<details
+  class="
+    bg-base-100
+    rounded-xl
+    p-6
+  "
+>
+
+<summary
+  class="
+    cursor-pointer
+    font-semibold
+    text-lg
+  "
+>
+
+שיטת משלוח
+
+</summary>
+
+
+<div
+  class="
+    mt-4
+    space-y-2
+  "
+>
+
+<label
+  class="
+    flex
+    gap-2
+    items-center
+  "
+>
+
+<input
+  type="radio"
+  name="shipping"
+  value="pickup"
+  checked
+/>
+
+איסוף עצמי
+
+</label>
+
+
+<label
+  class="
+    flex
+    gap-2
+    items-center
+  "
+>
+
+<input
+  type="radio"
+  name="shipping"
+  value="delivery"
+/>
+
+שליח
+
+</label>
+
+</div>
+
+</details>
+
+
+
+<!-- payment -->
+<details
+  class="
+    bg-base-100
+    rounded-xl
+    p-6
+  "
+>
+
+<summary
+  class="
+    cursor-pointer
+    font-semibold
+    text-lg
+  "
+>
+
+שיטת תשלום
+
+</summary>
+
+
+<p
+  class="
+    mt-4
+    text-sm
+    opacity-60
+  "
+>
+
+כאן תתחבר סליקת BOS בהמשך
+
+</p>
+
+</details>
+
+
+
+<button
+  class="
+    btn
+    btn-primary
+    w-full
+    mt-6
+  "
+>
+
+שליחת הזמנה
+
+</button>
+
+
+<p
+  id="checkout-msg"
+  class="text-sm mt-2"
+></p>
+
+</form>
+
+</div>
+
+</div>
+
+</section>
+
+
+
+<script>
+
+const form =
+document.querySelector<HTMLFormElement>(
+"#checkout-form"
+)
+
+const msg =
+document.querySelector<HTMLParagraphElement>(
+"#checkout-msg"
+)
+
+
+if(form && msg){
+
+form.addEventListener(
+"submit",
+
+async e => {
+
+e.preventDefault()
+
+msg.textContent =
+"שולח..."
+
+
+const formData =
+new FormData(form)
+
+const data =
+Object.fromEntries(
+formData.entries()
+)
+
+
+const res =
+await fetch(
+
+"/api/checkout",
+
+{
+method: "POST",
+
+headers:{
+"Content-Type":
+"application/json"
+},
+
+body:
+JSON.stringify(data)
+}
+)
+
+
+/*
+טיפוס בטוח ל-response
+*/
+
+type ApiResponse = {
+
+ok?: boolean
+
+error?: string
+
+}
+
+
+const json =
+await res.json() as ApiResponse
+
+
+
+if(res.ok){
+
+msg.textContent =
+"ההזמנה התקבלה ✔"
+
+form.reset()
+
+}else{
+
+msg.textContent =
+json.error ??
+"שגיאה בשליחת ההזמנה"
+
+}
+
+})
+}
+
+</script>
+
+
+<style>
+
+.input{
+
+@apply
+border
+rounded-lg
+p-3
+w-full
+
+}
+
+.textarea{
+
+@apply
+border
+rounded-lg
+p-3
+w-full
+min-h-[120px]
+
+}
+
+</style>
+
+
+</PrimaryLayout>

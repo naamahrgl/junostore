@@ -1,0 +1,420 @@
+---
+import PrimaryLayout from "~/layouts/PrimaryLayout.astro"
+
+import {
+  getCollections,
+  getProducts
+} from "~/lib/client.mock.ts"
+
+import CategoryBig
+from "~/components/ui/CategoryBig.astro"
+
+import CategorySmall
+from "~/components/ui/CategorySmall.astro"
+
+import type {
+  Collection
+} from "~/lib/client.types.ts"
+export function getStaticPaths() {
+
+  const animals = ["dogs", "cats"]
+
+  return animals.map(animal => ({
+    params: { animal }
+  }))
+
+}
+
+/* ------------------ */
+/* route param */
+/* ------------------ */
+
+const animal =
+  Astro.params.animal
+
+const validAnimals = ["cats", "dogs"]
+
+if (!animal || !validAnimals.includes(animal)) {
+  throw new Error(`Invalid animal slug: ${animal}`)
+}
+
+
+/* ------------------ */
+/* url params */
+/* ------------------ */
+
+const searchParams =
+  Astro.url.searchParams
+
+const selectedTags =
+  searchParams.getAll("tags")
+
+const page =
+  Number(
+    searchParams.get("page") ?? 1
+  )
+
+const perPage = 24
+
+
+/* ------------------ */
+/* load data */
+/* ------------------ */
+
+const { data: collectionsData } =
+  await getCollections()
+
+const { data: productsData } =
+  await getProducts()
+
+
+const allProducts =
+  productsData?.items ?? []
+
+let collections =
+  collectionsData?.items ?? []
+
+
+/* ------------------ */
+/* filter products */
+/* ------------------ */
+
+let filteredProducts =
+  allProducts.filter(product =>
+
+    product.cat_dog?.includes(animal)
+
+  )
+
+
+/* filter by tags */
+
+if (selectedTags.length > 0) {
+
+  filteredProducts =
+    filteredProducts.filter(product =>
+
+      selectedTags.some(tag =>
+        product.tags?.includes(tag)
+      )
+
+    )
+
+}
+
+
+/* ------------------ */
+/* filter collections */
+/* ------------------ */
+
+const allowedCollectionIds =
+  new Set(
+
+    filteredProducts.flatMap(product =>
+      product.collectionIds ?? []
+    )
+
+  )
+
+
+collections =
+  collections.filter(collection =>
+    allowedCollectionIds.has(collection.id)
+  )
+
+
+/* ------------------ */
+/* pagination */
+/* ------------------ */
+
+const totalPages =
+  Math.ceil(
+    collections.length / perPage
+  )
+
+collections =
+  collections.slice(
+
+    (page - 1) * perPage,
+
+    page * perPage
+
+  )
+
+
+/* ------------------ */
+/* helpers */
+/* ------------------ */
+
+const allTags =
+  Array.from(
+
+    new Set(
+
+      filteredProducts.flatMap(p =>
+        p.tags ?? []
+      )
+
+    )
+
+  ).sort()
+
+
+function pairCollections(
+  arr: Collection[]
+): (Collection | undefined)[][] {
+
+  const pairs:
+    (Collection | undefined)[][] = []
+
+  for (let i = 0; i < arr.length; i += 2) {
+
+    pairs.push([
+      arr[i],
+      arr[i + 1]
+    ])
+
+  }
+
+  return pairs
+
+}
+
+
+const rows =
+  pairCollections(collections)
+
+
+function buildTagUrl(
+  tag: string
+){
+
+  const params =
+    new URLSearchParams(searchParams)
+
+  const isActive =
+    selectedTags.includes(tag)
+
+  if (isActive) {
+
+    params.delete("tags", tag)
+
+  } else {
+
+    params.append("tags", tag)
+
+  }
+
+  return `?${params.toString()}`
+
+}
+
+---
+
+<PrimaryLayout
+title={`קטגוריות ${animal}`}
+>
+
+<section
+class="
+site-container
+py-12
+space-y-10
+"
+>
+
+<h1 class="h2 text-6xl text-theme-base-600">
+
+
+קטגוריות {animal === "dogs"
+? "לכלבים"
+: "לחתולים"}
+
+</h1>
+
+
+
+<!-- filters -->
+
+
+
+
+<!-- filters -->
+
+<div class="flex flex-wrap gap-2 justify-center">
+
+{
+allTags.map(tag => (
+
+<a
+href={buildTagUrl(tag)}
+
+class="
+px-3
+py-1
+border
+border-theme-base-50
+rounded
+inline-block
+"
+>
+
+{tag}
+
+</a>
+
+))
+}
+
+</div>
+</div>
+
+
+
+<!-- grid -->
+
+<div class="space-y-6">
+
+{
+rows.map((pair, rowIndex) => {
+
+const bigLeft =
+  rowIndex % 2 === 0
+
+const big =
+  pair[0]
+
+const small =
+  pair[1]
+
+return (
+
+<div
+class="
+grid
+md:grid-cols-3
+gap-6
+"
+>
+
+{
+
+bigLeft
+? (
+<>
+
+<CategoryBig
+collection={big}
+}
+/>
+
+{small && (
+
+<CategorySmall
+collection={small}
+}
+
+/>
+
+)}
+
+</>
+
+)
+
+: (
+
+<>
+
+{small && (
+
+<CategorySmall
+collection={small}
+/>
+
+)}
+
+<CategoryBig
+collection={big}
+/>
+
+</>
+
+)
+
+}
+
+</div>
+
+)
+
+})
+}
+
+</div>
+
+
+
+<!-- pagination -->
+
+<div
+class="
+flex
+justify-center
+gap-2
+pt-8
+"
+>
+
+{
+
+Array.from({
+
+length: totalPages
+
+}).map((_,i)=>{
+
+const params =
+  new URLSearchParams(searchParams)
+
+params.set(
+"page",
+String(i+1)
+)
+
+return (
+
+<a
+
+href={`?${params.toString()}`}
+
+class={`
+px-3
+py-1
+border
+rounded
+
+${page === i+1
+? "bg-primary-500 text-white"
+: ""}
+
+`}
+
+>
+
+{i+1}
+
+</a>
+
+)
+
+})
+
+}
+
+</div>
+
+
+</section>
+
+</PrimaryLayout>

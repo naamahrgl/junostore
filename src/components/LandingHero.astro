@@ -1,0 +1,83 @@
+---
+import twoXl from '~/assets/hero.png';
+import { button } from '~/styles.ts';
+---
+
+<header class="breakout bg-theme-base-200">
+
+  <div class="mx-auto max-w-7xl px-4">
+
+    <!-- mobile layout -->
+    <section
+      class="
+      flex flex-col
+      justify-center
+
+      h-[540px]
+
+      md:h-[720px]
+      md:flex-row
+      md:items-center
+      md:gap-32
+      "
+    >
+
+   
+
+      <!-- text -->
+      <div
+        class="
+        flex flex-col
+        gap-6
+
+        text-center
+        md:text-right
+
+        md:w-1/2
+        "
+      >
+
+        <h1 class="text-5xl md:text-8xl font-sans max-w-md text-theme-base-600">
+
+          כי מגיע להם את הטוב ביותר
+
+        </h1>
+		<h2 class="text-xl md:text-2xl font-bold max-w-md text-theme-base-600">
+מזון, טיפוח, צעצועים ואביזרים — הכל מאוצר בקפידה. כי
+כשמדובר בכלב שלך, רק המיטב מספיק
+</h2>
+        <div class="flex flex-col md:flex-row gap-4 md:items-right">
+  <button class={` h-24 text-xl py-6 px-12 w-52 ${button({ theme:'light' })}`}>
+            גלו את המוצרים שלנו
+          </button>
+          <button class={` h-24 text-xl py-6 px-12 w-52 ${button({ theme:'ghost' })}`} >
+            המבצעים שלנו
+          </button>
+
+        
+
+        </div>
+
+      </div>
+	     <!-- image -->
+      <div class="flex justify-center md:justify-start md:w-1/2">
+
+        <img
+          src={twoXl.src}
+          alt=""
+          class="
+          h-[220px]
+
+          md:h-[80%]
+          w-auto
+          "
+        />
+
+      </div>
+
+    </section>
+
+  </div>
+						<hr class="breakout  border-theme-base-600 mt-4 mb-6 w-full border-1" />
+
+</header>

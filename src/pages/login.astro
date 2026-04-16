@@ -1,0 +1,36 @@
+---
+import LoginForm from "../components/form"
+import PrimaryLayout from '~/layouts/PrimaryLayout.astro';
+import twoXl from '~/assets/footerlogo.png';
+
+---
+
+<PrimaryLayout title="Login">
+<div class=" flex flex-col md:flex-row items-center justify-center ">
+
+    <!-- LEFT -->
+    <div class="flex items-center justify-center p-8         md:w-1/2">
+      <div class="w-full max-w-md text-center space-y-6">
+
+        <h1 class="text-xl font-bold text-theme-base-600">
+          ברוכים הבאים לג׳ונו
+        </h1>
+
+        <p class="text-orange-500">
+          החנות הכי מגניבה בארץ
+        </p>
+
+        <LoginForm client:load />
+
+      </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class=" flex   items-center justify-center bg-theme-base-600 text-white text-5xl font-bold md:w-1/2">
+      			<img src={twoXl.src} class="h-[420px]">
+
+      
+    </div>
+
+  </div>
+</PrimaryLayout>

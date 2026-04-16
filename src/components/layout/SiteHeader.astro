@@ -1,0 +1,44 @@
+---
+import { CartDrawer } from '~/features/cart/CartDrawer.tsx';
+import type { HTMLAttributes } from 'astro/types';
+import twoXl from '~/assets/logo.png';
+import Nav from './Nav.astro';
+import Hamburger from './Hamburger.astro';
+
+
+export interface Props extends HTMLAttributes<'nav'> {}
+
+const { class: className, ...props } = Astro.props;
+---
+<header class="breakout relative    bg-[var(--accent)] flex flex-row  items-center justify-between  ">
+<div
+	aria-label="Site navigation"
+	class:list={["breakout px-4 flex items-center  justify-between flex-row-reverse bg-theme-base-600 ", className]}
+	{...props}
+>
+
+	<div class="flex items-center  gap-2">
+		<a  href="/">
+						<img src={twoXl.src} class="h-16">
+
+		</a>
+	</div>
+	<Nav />
+		<div class="flex items-center   ">
+
+    <Hamburger />
+
+		<CartDrawer client:idle />
+		</div>
+</div>
+</header>
+<script>
+	function focusSearch() {
+		const searchInput = document.getElementById('global-search');
+		if (window.location.pathname.startsWith('/search')) {
+			searchInput!.focus();
+		}
+	}
+	document.addEventListener('astro:page-load', focusSearch);
+	document.addEventListener('astro:after-swap', focusSearch);
+</script>

@@ -1,0 +1,39 @@
+---
+import CollectionCard from './CollectionCard.astro';
+import { PageHeading, PageSection, PageSubHeading } from '~/components/ui/PageSection.tsx';
+import { getCollections } from 'storefront:client';
+
+export interface Props {
+	heading1?: string;
+		heading2?: string;
+subheading?: string;
+}
+
+const collectionsResponse = await getCollections();
+
+const collections = collectionsResponse.data?.items ?? [];
+
+const HEADING_ID = 'collection-section-heading';
+const { heading1= ' מה אתם', heading2= ' מחפשים?', subheading = 'קטגוריות' } = Astro.props;
+---
+
+<PageSection aria-labelledby={HEADING_ID}>
+		<div class='flex flex-row justify-start'>
+		<PageSubHeading id={HEADING_ID} class='text-theme-base-600 ' >{subheading}</PageSubHeading>
+		</div>
+	<div class='flex flex-row gap-3  justify-start'>
+			<PageHeading id={HEADING_ID} class='text-theme-base-300' >{heading1}</PageHeading>
+	<PageHeading id={HEADING_ID} class='text-theme-base-600 '>{heading2}</PageHeading>
+</div>
+	<div class="grid gap-px  sm:grid-cols-[repeat(auto-fit,minmax(16rem,1fr))] mt-20">
+		{
+			collections.map(
+				(collection, index) =>
+					collection.slug && <CollectionCard {...collection} slug={collection.slug} 
+					    isFirst={index === 0}
+          isLast={index === collections.length - 1}
+		  />,
+			)
+		}
+	</div>
+</PageSection>

@@ -1,0 +1,63 @@
+---
+// src/components/Navigation.astro
+ const navlinks =
+  `
+  hidden
+  lg:flex
+  gap-7
+  p-4
+  lg:static
+  fixed inset-0
+  bg-theme-base-600
+flex
+items-center 
+justify-center
+text-center
+flex-col
+md:flex-row
+  `;
+ const navlinkItem = "text-theme-base-200  text-xl hover:text-[var(--main)] transition-colors  duration-150";
+
+interface Props {
+  overrideClass?: string;
+  containerClass?: string;
+}
+
+const { overrideClass, containerClass } = Astro.props;
+
+const container = containerClass ?? navlinks;
+const linkClass = overrideClass ?? navlinkItem;
+
+const t = {
+    about: 'אודות',
+ 
+    blog: "בלוג",
+        products: "קטגוריות",
+    events: "לוח אירועים",
+    offers: 'מבצעים',
+        brands: "ברנדז",
+        new: "מוצרים חדשים",
+    qa: "שאלות ותשובות",
+    contact: 'צור קשר',
+
+
+};
+
+---
+
+<div id="navlinks" class={container} >
+
+    <a href=`/blog/` class={linkClass}>{t.blog}</a>
+  <a href=`/products/` class={linkClass}>{t.products}</a>
+    <a href=`/events/` class={linkClass}>{t.events}</a>
+    <a href=`/about/` class={linkClass}>{t.about}</a>
+        <a href=`/offers/` class={linkClass}>{t.offers}</a>
+  <a href=`/brands/` class={linkClass}>{t.brands}</a>
+    <a href=`/new/` class={linkClass}>{t.new}</a>
+    <a href=`/qa/` class={linkClass}>{t.qa}</a>
+    <a href=`/contact/` class={linkClass}>{t.contact}</a>
+
+
+
+</div>
+

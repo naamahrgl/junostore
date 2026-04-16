@@ -1,0 +1,166 @@
+---
+import FeaturedCollectionCard from './FeaturedCollectionCard.astro';
+import type { featuredItem } from './FeaturedCollectionCard.astro';
+import { PageHeading, PageSection, PageSubHeading, PageSubtitle } from '~/components/ui/PageSection.tsx';
+
+
+const dogsfeaturedData: featuredItem[] = [
+  {
+    title: "מזון יבש לכלבים",
+    uppertitle: "מבצע החודש",
+    subtitle: "Royal Canin, Hill's, Orijen ועוד. מאות מוצרים עם פילטרים מדויקים לגזע, גיל וצרכים רפואיים.",
+    slug: "/collections/pets/dogs",
+    buttontext: ["גלו מזון יבש"],
+    buttontypes: ["light"],
+    imageUrl: '/assets/dog3.jpg',
+        imageclass: "w-auto h-auto"
+
+  },
+  {
+    title: "רצועות ורתמות",
+    uppertitle: "ספורט ואקטיביות",
+    subtitle: "מהטיולים הקצרים ועד להרפתקאות הגדולות — ציוד שמחזיק.",
+    slug: "/collections/pets/dogs",
+    buttontext: ["לקנות עכשיו"],
+    buttontypes: ["dark"],
+    imageUrl: '/assets/dog2.jpg',
+        imageclass: "w-full h-full"
+
+  },
+  {
+    title: "שמפו מברשות ועוד",
+    uppertitle: "טיפוח והיגיינה",
+    subtitle: "מוצרי טיפוח מהמובילים בעולם לפרווה בריאה ומבריקה.",
+    slug: "/collections/pets/dogs",
+    buttontext: ["לקנות עכשיו"],
+    buttontypes: ["ghost"],
+		imageUrl: '/assets/dog1.jpg',
+    imageclass: "w-full h-full"
+  },
+  {
+    title: "מה הכלב שלך אוכל?",
+    uppertitle: "פיינדר תזונה חכם",
+    subtitle: "ענו על 3 שאלות קצרות וקבלו המלצה מותאמת אישית על מזון המדויק לגזע, הגיל ומצב הבריאות של הכלב שלכם.",
+    slug: "/collections/pets/dogs",
+    buttontext: ["ענו על השאלון"],
+    buttontypes: ["light"],
+    imageUrl:'/assets/dog1.jpg',
+        imageclass: "w-32 h-32 justify-start"
+
+  },
+];
+
+const catsfeaturedData: featuredItem[] = [
+  {
+    title: "מזון יבש לחתולים",
+    uppertitle: "הנמכר ביותר",
+    subtitle: "שלב בחיים · סטרילי/לא סטרילי · חתולי חצר. מאות מוצרים מ-Royal Canin, Hill's ועוד.",
+    slug: "/collections/pets/cats",
+    buttontext: ["גלו מזון יבש"],
+    buttontypes: ["light"],
+    imageUrl: '/assets/cat1.jpg',
+        imageclass: "w-full h-full"
+
+  },
+  {
+    title: "חול וארגזים",
+    uppertitle: "ציוד חיוני",
+    subtitle: "מתגבש, קריסטל, טבעי — ארגז פתוח או סגור, ממה שעובד.",
+    slug: "/collections/pets/cats",
+    buttontext: ["לקנות עכשיו"],
+    buttontypes: ["dark"],
+    imageUrl: '/assets/cat2.jpg',
+        imageclass: "w-full h-full"
+
+  },
+  {
+    title: "צעצועים ומשחקי גירוד",
+    uppertitle: "משחק וריהוט",
+    subtitle: "חכות, כדורים, קטניף, לייזר — ועמודי גירוד שישרדו.",
+    slug: "/collections/pets/cats",
+    buttontext: ["לקנות עכשיו"],
+    buttontypes: ["ghost"],
+    imageUrl: '/assets/act3.jpg',
+        imageclass: "w-full h-full"
+
+  },
+
+];
+
+const HEADING_ID = 'collection-section-heading';
+const { heading1= '  הכלב שלך', heading2= 'מחכה.', subheading = 'קטגוריות לכלבים', subtitle = 'כל מה שצריך לכלב בריא, שמח ומטופח — ממזון איכותי ועד צעצועים שיכניסו שמחה לחיים.', heading3= '  החתול שלך', heading4= 'מחכה.', subheading3 = 'קטגוריות לחתולים', subtitle3 = 'מזון, חול, צעצועים וטיפוח — הכל מאוצר בקפידה לחתולים שמגיעים לטוב ביותר.' } = Astro.props;
+
+---
+
+
+<PageSection  >
+    		<div class='flex flex-row justify-start'>
+		<PageSubHeading id={HEADING_ID} class='text-theme-base-600 ' >{subheading}</PageSubHeading>
+		</div>
+	<div class='flex flex-row gap-3  justify-start'>
+        	<PageHeading id={HEADING_ID} class='text-theme-base-600' >{heading1}</PageHeading>
+
+	<PageHeading id={HEADING_ID} class='text-theme-base-50 '>{heading2}</PageHeading>
+ 
+</div>
+   		<div class='flex flex-row justify-start text-xs'>
+		<PageSubtitle id={HEADING_ID} class='text-xxs text-theme-base-600 ' >{subtitle}</PageSubtitle>
+		</div>
+
+<div
+class="
+grid
+gap-px
+grid-cols-1
+
+
+
+md:grid-cols-4
+md:grid-rows-[0.6fr_0.4fr]
+md:h-[1180px]
+
+">
+
+<FeaturedCollectionCard item={dogsfeaturedData[0]!} area="a" />
+<FeaturedCollectionCard item={dogsfeaturedData[1]!} area="b" />
+<FeaturedCollectionCard item={dogsfeaturedData[2]!} area="c" />
+<FeaturedCollectionCard item={dogsfeaturedData[3]!} area="d" />
+
+</div>
+
+</PageSection >
+
+<PageSection >
+    		<div class='flex flex-row justify-start'>
+		<PageSubHeading id={HEADING_ID} class='text-theme-base-600 ' >{subheading3}</PageSubHeading>
+		</div>
+	<div class='flex flex-row gap-3  justify-start'>
+        	<PageHeading id={HEADING_ID} class='text-theme-base-600' >{heading3}</PageHeading>
+
+	<PageHeading id={HEADING_ID} class='text-theme-base-50 '>{heading4}</PageHeading>
+</div>
+   		<div class='flex flex-row justify-start text-xs'>
+		<PageSubtitle id={HEADING_ID} class='text-xxs text-theme-base-600 ' >{subtitle3}</PageSubtitle>
+		</div>
+
+<div
+class="
+grid
+gap-px
+grid-cols-1
+
+
+
+md:grid-cols-4
+md:grid-rows-[0.6fr_0.4fr]
+md:h-[1180px]
+
+">
+
+<FeaturedCollectionCard item={catsfeaturedData[0]!} area="a" />
+<FeaturedCollectionCard item={catsfeaturedData[1]!} area="b" />
+<FeaturedCollectionCard item={catsfeaturedData[2]!} area="c" />
+
+</div>
+
+</PageSection>

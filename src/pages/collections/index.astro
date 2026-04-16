@@ -1,0 +1,402 @@
+---
+import PrimaryLayout from "~/layouts/PrimaryLayout.astro"
+import { getCollections, getProducts } from "~/lib/client.mock.ts"
+import CategoryBig from "~/components/ui/CategoryBig.astro"
+import CategorySmall from "~/components/ui/CategorySmall.astro"
+import type { Collection } from "~/lib/client.types.ts"
+
+
+
+const searchParams = Astro.url.searchParams
+
+const selectedTags =
+  searchParams.getAll("tags")
+
+const page =
+  Number(searchParams.get("page") ?? 1)
+
+const perPage = 24
+
+const { data: collectionsData } =
+  await getCollections()
+
+const { data: productsData } =
+  await getProducts()
+
+const products =
+  productsData?.items ?? []
+
+let collections =
+  collectionsData?.items ?? []
+
+
+/* ------------------ */
+/* filter collections */
+/* ------------------ */
+
+if (selectedTags.length > 0) {
+
+  const allowedCollectionIds =
+    new Set(
+
+      products
+
+        .filter(product =>
+
+          selectedTags.some(tag =>
+            product.tags?.includes(tag)
+          )
+
+        )
+
+        .flatMap(product =>
+          product.collectionIds ?? []
+        )
+
+    )
+
+  collections =
+    collections.filter(collection =>
+      allowedCollectionIds.has(collection.id)
+    )
+
+}
+
+
+/* ------------------ */
+/* pagination */
+/* ------------------ */
+
+const totalPages =
+  Math.ceil(
+    collections.length / perPage
+  )
+
+collections =
+  collections.slice(
+
+    (page - 1) * perPage,
+
+    page * perPage
+
+  )
+
+
+/* ------------------ */
+/* helpers */
+/* ------------------ */
+
+const allTags =
+  Array.from(
+
+    new Set(
+
+      products.flatMap(p =>
+        p.tags ?? []
+      )
+
+    )
+
+  ).sort()
+
+function pairCollections(
+  arr: Collection[]
+): (Collection | undefined)[][] {
+
+  const pairs:
+    (Collection | undefined)[][] = []
+
+  for (let i = 0; i < arr.length; i += 2) {
+
+    pairs.push([
+      arr[i],
+      arr[i + 1]
+    ])
+
+  }
+
+  return pairs
+
+}
+
+const rows =
+  pairCollections(collections)
+
+
+function buildTagUrl(tag: string) {
+
+  const params =
+    new URLSearchParams(searchParams)
+
+  const tags =
+    params.getAll("tags")
+
+  if (tags.includes(tag)) {
+
+    const newTags =
+      tags.filter(t => t !== tag)
+
+    params.delete("tags")
+
+    newTags.forEach(t =>
+      params.append("tags", t)
+    )
+
+  } else {
+
+    params.append("tags", tag)
+
+  }
+
+  return `?${params.toString()}`
+}
+const queryString =
+  searchParams.toString()
+
+const qs =
+  queryString
+    ? `?${queryString}`
+    : ""
+---
+
+<PrimaryLayout title="קטגוריות">
+
+<section class="site-container py-12 space-y-10">
+
+
+<h1 class="h2 text-6xl text-theme-base-600">
+
+הקטגוריות שלנו
+
+</h1>
+
+<h2 class="h3 text-xl text-theme-base-600">תזונה מדויקת המבוססת על מחקר — מותאמת לשלב בחיים, גודל הגזע, ומצב הבריאות של הכלב שלך.</h2>
+
+<div class="flex gap-4 justify-center">
+    
+<a
+href={`/collections/pets/dogs${qs}`}
+class="
+px-3
+py-1
+border
+border-theme-base-50
+rounded
+inline-block
+
+
+"
+>
+
+כלבים
+
+</a>
+<a
+href={`/collections/pets/cats${qs}`}
+class="
+px-3
+py-1
+border
+border-theme-base-50
+rounded
+inline-block
+"
+>
+
+חתולים
+
+</a>
+
+</div>
+
+<!-- filters -->
+
+<div class="flex flex-wrap gap-2 justify-center">
+
+{
+allTags.map(tag => (
+
+<a
+href={buildTagUrl(tag)}
+class={`
+px-3
+py-1
+border
+rounded
+inline-block
+
+${selectedTags.includes(tag)
+  ? "bg-theme-base-100 text-theme-base-50 border-theme-base-100"
+  : "border-theme-base-50"
+}
+`}
+>
+{tag}
+</a>
+
+))
+}
+
+</div>
+
+
+
+<!-- grid -->
+
+<div class="space-y-6">
+
+
+{
+rows.map((pair, rowIndex) => {
+
+const bigLeft =
+  rowIndex % 2 === 0
+
+const big =
+  pair[0]
+
+const small =
+  pair[1]
+
+
+
+return (
+
+<div
+
+class="
+grid
+md:grid-cols-3
+gap-6
+
+"
+
+>
+
+{
+
+bigLeft
+? (
+<>
+
+<CategoryBig collection={big} href={`/collections/${big?.slug}${qs}`}/>
+
+{small && (
+<CategorySmall collection={small} href={`/collections/${small?.slug}${qs}`}/>
+)}
+
+</>
+
+)
+
+: (
+
+<>
+
+{small && (
+<CategorySmall collection={small} href={`/collections/${small?.slug}${qs}`}/>
+)}
+
+<CategoryBig collection={big} href={`/collections/${big?.slug}${qs}`}/>
+
+</>
+
+)
+
+}
+
+</div>
+
+)
+
+})
+}
+
+
+</div>
+
+
+
+<!-- pagination -->
+
+<div class="flex justify-center gap-2 pt-8">
+
+{
+
+Array.from({
+
+length: totalPages
+
+}).map((_,i)=>{
+
+const params =
+  new URLSearchParams(searchParams)
+
+params.set(
+"page",
+String(i+1)
+)
+
+console.log("selectedTags", selectedTags)
+console.log("products", products.length)
+
+
+
+return (
+
+<a
+
+href={`?${params.toString()}`}
+
+class={`
+px-3
+py-1
+border
+rounded
+
+${page === i+1
+? "bg-primary-500 text-white"
+: ""
+}
+
+`}
+
+>
+
+{i+1}
+
+</a>
+
+)
+
+})
+
+}
+
+</div>
+
+
+</section>
+
+</PrimaryLayout>
+
+
+
+
+<!-- components inline -->
+
+<style>
+
+</style>
+
+
+
+<!-- big card -->
+
+<Fragment
+
+set:html={`
+${""}
+`}
+
+/>
