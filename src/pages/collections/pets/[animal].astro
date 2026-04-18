@@ -80,7 +80,7 @@ let collections =
 /* ------------------ */
 
 let filteredProducts =
-  allProducts.filter(product =>
+  allProducts.filter((product: any) =>
 
     product.cat_dog?.includes(animal)
 
@@ -92,13 +92,11 @@ let filteredProducts =
 if (selectedTags.length > 0) {
 
   filteredProducts =
-    filteredProducts.filter(product =>
+    filteredProducts// Add the 'return' before selectedTags.some
+.filter((product: any) => {
+  return selectedTags.some(tag => product.tags?.includes(tag))
+})
 
-      selectedTags.some(tag =>
-        product.tags?.includes(tag)
-      )
-
-    )
 
 }
 
@@ -110,7 +108,7 @@ if (selectedTags.length > 0) {
 const allowedCollectionIds =
   new Set(
 
-    filteredProducts.flatMap(product =>
+    filteredProducts.flatMap((product: any) =>
       product.collectionIds ?? []
     )
 
@@ -151,7 +149,7 @@ const allTags =
 
     new Set(
 
-      filteredProducts.flatMap(p =>
+      filteredProducts.flatMap((p: any) =>
         p.tags ?? []
       )
 
@@ -185,29 +183,17 @@ const rows =
   pairCollections(collections)
 
 
-function buildTagUrl(
-  tag: string
-){
-
-  const params =
-    new URLSearchParams(searchParams)
-
-  const isActive =
-    selectedTags.includes(tag)
-
-  if (isActive) {
-
-    params.delete("tags", tag)
-
+function buildTagUrl(tag: string) {
+  const params = new URLSearchParams(searchParams);
+  // Using .has() and .append() for cleaner logic
+  if (params.has("tags", tag)) {
+    params.delete("tags", tag);
   } else {
-
-    params.append("tags", tag)
-
+    params.append("tags", tag);
   }
-
-  return `?${params.toString()}`
-
+  return `?${params.toString()}`;
 }
+
 
 ---
 
@@ -244,19 +230,23 @@ space-y-10
 <div class="flex flex-wrap gap-2 justify-center">
 
 {
-allTags.map(tag => (
+  allTags.filter(tag => typeof tag === 'string').map((tag) => (
 
 <a
-href={buildTagUrl(tag)}
+href={buildTagUrl(tag as string)}
 
-class="
+class={`
 px-3
 py-1
 border
-border-theme-base-50
 rounded
 inline-block
-"
+
+${selectedTags.includes(tag as string)
+  ? "bg-theme-base-100 text-theme-base-50 border-theme-base-100"
+  : "border-theme-base-50"
+}
+`}
 >
 
 {tag}
@@ -296,53 +286,22 @@ md:grid-cols-3
 gap-6
 "
 >
-
-{
-
-bigLeft
-? (
-<>
-
-<CategoryBig
-collection={big}
-}
-/>
-
-{small && (
-
-<CategorySmall
-collection={small}
-}
-
-/>
-
+{bigLeft ? (
+  <>
+    <CategoryBig collection={big} href={`/collections/${big?.slug}?${searchParams.toString()}`} />
+    {small && (
+      <CategorySmall collection={small} href={`/collections/${small?.slug}?${searchParams.toString()}`} />
+    )}
+  </>
+) : (
+  <>
+    {small && (
+      <CategorySmall collection={small} href={`/collections/${small?.slug}?${searchParams.toString()}`} />
+    )}
+    <CategoryBig collection={big} href={`/collections/${big?.slug}?${searchParams.toString()}`} />
+  </>
 )}
 
-</>
-
-)
-
-: (
-
-<>
-
-{small && (
-
-<CategorySmall
-collection={small}
-/>
-
-)}
-
-<CategoryBig
-collection={big}
-/>
-
-</>
-
-)
-
-}
 
 </div>
 

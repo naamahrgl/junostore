@@ -27,7 +27,9 @@
 		"test-boss": "tsx src/scripts/test-boss.ts",
 		"test-stock": "tsx src/scripts/test-stock.ts",
 		"sync-boss": "tsx src/scripts/sync-boss.ts",
-		"sync-customers-boss": "tsx src/scripts/sync-customers-boss.ts"
+		"sync-customers-boss": "tsx src/scripts/sync-customers-boss.ts",
+				"sync-stock": "tsx src/scripts/sync-stock.ts"
+
 
 	},
 	"devDependencies": {

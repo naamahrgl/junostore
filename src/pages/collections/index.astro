@@ -41,15 +41,13 @@ if (selectedTags.length > 0) {
 
       products
 
-        .filter(product =>
+// Add the 'return' before selectedTags.some
+.filter((product: any) => {
+  return selectedTags.some(tag => product.tags?.includes(tag))
+})
 
-          selectedTags.some(tag =>
-            product.tags?.includes(tag)
-          )
 
-        )
-
-        .flatMap(product =>
+        .flatMap((product: any) =>
           product.collectionIds ?? []
         )
 
@@ -91,7 +89,7 @@ const allTags =
 
     new Set(
 
-      products.flatMap(p =>
+      products.flatMap((p: any) =>
         p.tags ?? []
       )
 
@@ -214,10 +212,10 @@ inline-block
 <div class="flex flex-wrap gap-2 justify-center">
 
 {
-allTags.map(tag => (
+  allTags.filter(tag => typeof tag === 'string').map((tag) => (
 
 <a
-href={buildTagUrl(tag)}
+href={buildTagUrl(tag as string)}
 class={`
 px-3
 py-1
@@ -225,7 +223,7 @@ border
 rounded
 inline-block
 
-${selectedTags.includes(tag)
+${selectedTags.includes(tag as string)
   ? "bg-theme-base-100 text-theme-base-50 border-theme-base-100"
   : "border-theme-base-50"
 }

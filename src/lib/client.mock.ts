@@ -2,6 +2,7 @@
 // You can use this as a template to connect your own ecommerce provider.
 
 import type { Options, RequestResult } from '@hey-api/client-fetch';
+import { supabase } from './supabase'
 import type {
 	Collection,
 	CreateCustomerData,
@@ -22,55 +23,91 @@ import type {
 	GetProductByIdData,
 	GetProductByIdError,
 	GetProductByIdResponse,
-	GetProductsData,
-	GetProductsError,
-	GetProductsResponse,
 	Order,
 	Product,
 } from './client.types.ts';
 
 export * from './client.types.ts';
 
-export const getProducts = <ThrowOnError extends boolean = false>(
-	options?: Options<GetProductsData, ThrowOnError>,
-): RequestResult<GetProductsResponse, GetProductsError, ThrowOnError> => {
-	let items = Object.values(products);
-	if (options?.query?.collectionId) {
-		const collectionId = options.query.collectionId;
+export const getProducts = async (options?: any) => {
+  // 1. Ensure you use the correct table name (products or products_clean)
+  let query = supabase.from('products_clean').select('*'); 
 
-		items = items.filter((product) => product.collectionIds?.includes(collectionId));
-	}
+  // 2. Fix column name to match RAW data: 'collectionids'
+  if (options?.query?.collectionId) {
+    query = query.contains('collectionids', [options.query.collectionId]);
+  }
 
-	if (options?.query?.ids) {
-		const ids = Array.isArray(options.query.ids) ? options.query.ids : [options.query.ids];
-		items = items.filter((product) => ids.includes(product.id));
-	}
-	if (options?.query?.sort && options?.query?.order) {
-		const { sort, order } = options.query;
-		if (sort === 'price') {
-			items = items.sort((a, b) => {
-				return order === 'asc' ? a.price - b.price : b.price - a.price;
-			});
-		} else if (sort === 'name') {
-			items = items.sort((a, b) => {
-				return order === 'asc' ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name);
-			});
-		}
-	}
-	return asResult({ items, next: null });
+  const { data, error } = await query;
+  if (error) return asError(error);
+
+  const formattedItems = data?.map(p => ({
+    ...productDefaults,
+    ...p,
+    id: p.slug, 
+    imageUrl: p.imageurl || 'https://static.wixstatic.com/media/823c2d_d4cebb159b9a4875a2a3c9bba6483612~mv2.png', // RAW data has 'imageurl'
+    price: (p.price || 0) * 100, // RAW data has 'price' at 100
+    collectionIds: p.collectionids || [], // RAW data has 'collectionids'
+
+  }));
+
+  return asResult({ items: formattedItems, next: null }) as any;
 };
 
-export const getProductById = <ThrowOnError extends boolean = false>(
-	options: Options<GetProductByIdData, ThrowOnError>,
-): RequestResult<GetProductByIdResponse, GetProductByIdError, ThrowOnError> => {
-	const product = products[options.path.id];
-	if (!product) {
-		const error = asError<GetProductByIdError>({ error: 'not-found' });
-		if (options.throwOnError) throw error;
-		return error as RequestResult<GetProductByIdResponse, GetProductByIdError, ThrowOnError>;
-	}
-	return asResult(product);
+export const getProductById = async <ThrowOnError extends boolean = false>(
+  options: Options<GetProductByIdData, ThrowOnError>
+): Promise<RequestResult<GetProductByIdResponse, GetProductByIdError, ThrowOnError>> => {
+  const slug = options.path.id;
+
+  const { data: p, error } = await supabase
+    .from('products_clean')
+    .select('*')
+    .eq('slug', slug)
+    .single();
+
+  if (error || !p) {
+    const errorResponse = asError<GetProductByIdError>({ error: 'not-found' });
+    if (options.throwOnError) throw errorResponse;
+    return errorResponse as any;
+  }
+  if (slug.includes('felix')) {
+    console.log("🐱 FELIX DATA:", JSON.stringify(p, null, 2));
+  }
+  // 1. Logic to check if real variants exist
+  // We filter out nulls or empty strings from filter_values
+  const validValues = p.filter_values?.filter((v: any) => v !== null && v !== "");
+  const hasVariants = validValues && validValues.length > 0;
+
+  const dynamicVariants = hasVariants
+    ? validValues.map((val: string, index: number) => ({
+        id: `${p.slug}-${index}`,
+        name: val,
+        stock: p.stock ?? 0, // RAW data has 'stock'
+        options: { [p.filter_name || 'Option']: val } // Forces "Select Style"
+      }))
+    : [{
+        ...defaultVariant,
+        id: 'default',
+        name: 'Default',
+		        stock: p.stock ?? 1,
+        options: {} // Empty options = "Add to Cart" mode
+      }];
+
+  const formattedProduct = {
+    ...productDefaults,
+    ...p,
+    id: p.slug,
+    imageUrl: p.imageurl || 'https://static.wixstatic.com/media/823c2d_d4cebb159b9a4875a2a3c9bba6483612~mv2.png', // RAW,
+    price: (p.price || 0) * 100,
+    collectionIds: p.collectionids || [],
+    variants: dynamicVariants,
+  };
+
+  return asResult(formattedProduct as Product) as any;
 };
+
+
+
 
 export const getCollections = <ThrowOnError extends boolean = false>(
 	_options?: Options<GetCollectionsData, ThrowOnError>,
@@ -149,8 +186,6 @@ const collectionDefaults = {
 
 
 
-
-
 const collections: Record<string, Collection> = {
 		dryfood: {
 		id: 'dryfood',
@@ -180,7 +215,7 @@ const collections: Record<string, Collection> = {
 		id: 'toys',
 		name: 'משחקים',
 		description: 'Wear your love for Astro on your sleeve.',
-		slug: 'vet',
+		slug: 'toys',
 		emoji: '🚀',
 		...collectionDefaults,
 	},
@@ -196,7 +231,7 @@ const collections: Record<string, Collection> = {
 		id: 'teeth',
 		name: 'שיניים',
 		description: 'Wear your love for Astro on your sleeve.',
-		slug: 'vet',
+		slug: 'teeth',
 		emoji: '🚀',
 		...collectionDefaults,
 	},
@@ -208,30 +243,7 @@ const collections: Record<string, Collection> = {
 		emoji: '🚀',
 		...collectionDefaults,
 	},
-	apparel: {
-		id: 'apparel',
-		name: 'Apparel',
-		description: 'Wear your love for Astro on your sleeve.',
-		slug: 'apparel',
-		emoji: '🚀',
-		...collectionDefaults,
-	},
-	stickers: {
-		id: 'stickers',
-		name: 'Stickers',
-		description: 'Load up those laptop lids with Astro pride.',
-		slug: 'stickers',
-		emoji: '🚀',
-		...collectionDefaults,
-	},
-	bestSellers: {
-		id: 'bestSellers',
-		name: 'Best Sellers',
-		description: "You'll love these.",
-		slug: 'best-sellers',
-		emoji: '🚀',
-		...collectionDefaults,
-	},
+
 };
 
 const defaultVariant = {
@@ -242,15 +254,6 @@ const defaultVariant = {
 };
 
 const apparelVariants = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'].map((size, index) => ({
-	id: size,
-	name: size,
-	stock: index * 10,
-	options: {
-		Size: size,
-	},
-}));
-
-const foodlVariants = ['6 ק״ג', '12 ק״ג',].map((size, index) => ({
 	id: size,
 	name: size,
 	stock: index * 10,
@@ -284,7 +287,7 @@ const products: Record<string, Product> = {
 cat_dog: ['dogs'],
 				tags: [ 'היפואלרגני'],
 
-		variants: foodlVariants,
+		variants: apparelVariants,
 	},
 			'catli': {
 		...productDefaults,
@@ -299,7 +302,7 @@ cat_dog: ['dogs'],
 				tags: ['heavy weight', 'היפואלרגני'],
 cat_dog: ['cats', 'dpgs'],
 
-		variants: foodlVariants,
+		variants: apparelVariants,
 	},
 	'astro-icon-zip-up-hoodie': {
 		...productDefaults,

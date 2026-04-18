@@ -45,19 +45,19 @@ if (!productsResponse.data) {
 }
 
 const collection = collectionResponse.data;
-const products = productsResponse.data.items.filter((product) => {
+const products = productsResponse.data.items.filter((product : any) => {
 	return getProductStock(product) > 0;
 });
 const allTags = Array.from(
   new Set([
-    ...products.flatMap(p => p.tags ?? []),
+    ...products.flatMap((p: any) => p.tags ?? []),
     ...selectedTags
   ])
 ).sort();
 const filteredProducts =
   selectedTags.length === 0
     ? products
-    : products.filter((product) =>
+    : products.filter((product:any) =>
         selectedTags.some((tag) =>
           product.tags?.includes(tag)
         )
@@ -73,7 +73,7 @@ const filteredProducts =
 						{collection.name}
 					</h2>
 					<p class="text-sm font-medium text-slate-600">
-						{products.length} products
+						{products.length} מוצרים
 					</p>
 				</header>
 <nav class="flex flex-col gap-2" aria-labelledby="sort-by-heading">
@@ -169,7 +169,7 @@ ${isActive
 				aria-labelledby="products-heading"
 				aria-label="Products"
 			>
-{filteredProducts.map((product) => (
+{filteredProducts.map((product:any) => (
 <ProductCard {...product} />
 ))}
 			</section>

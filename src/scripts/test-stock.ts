@@ -2,6 +2,7 @@ import "dotenv/config"
 
 import {
   fetchProductsFromBoss,
+  fetchStocksFromBoss,
   fetchStockForProduct
 } from "../lib/boss-client"
 
@@ -13,30 +14,23 @@ type BossProductsResponse = {
 
 async function testStock() {
 
-  const products =
-    await fetchProductsFromBoss() as BossProductsResponse
 
-  const firstProduct =
-    products.Results?.[1]
 
-  if (!firstProduct) {
+  console.log("checking stock for",)
+
+  const stock =
+    await fetchStocksFromBoss()
+
+      if (!stock.Results || stock.Results.length === 0) {
 
     console.error("No products returned from BOS")
 
     return
   }
 
-  const firstId =
-    firstProduct.UniqueId
-
-  console.log("checking stock for", firstId)
-
-  const stock =
-    await fetchStockForProduct(firstId)
-
   console.log(
     "stock response:",
-    JSON.stringify(stock, null, 2)
+    JSON.stringify(stock, null, 2).slice(0, 5000)
   )
 }
 

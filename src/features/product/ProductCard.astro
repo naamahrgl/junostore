@@ -29,6 +29,8 @@ const { class: className, elementId, imageLoading, ...product } = Astro.props;
 				alt={product.name}
 				width={290}
 				height={290}
+				    class="w-full h-full object-contain p-4" 
+
 				loading={imageLoading ?? 'lazy'}
 				densities={[1, 1.5, 2]}
 				draggable="false"
@@ -36,6 +38,7 @@ const { class: className, elementId, imageLoading, ...product } = Astro.props;
 		</Card>
 		<div class="flex flex-col gap-2 p-2 font-medium">
 			<h3 class="text-pretty leading-tight text-theme-base-900">{product.name}</h3>
+			
 			<p class="text-lg/tight text-theme-base-600">
 				<ProductPrice price={product.price} discount={product.discount} />
 			</p>

@@ -27,15 +27,24 @@ type BossExInfo = {
   Name?: string
   NoteUniqueId?: number
 }
+type BossFilter = {
+  UniqueId: number
+  Name: string
+  TableHandle?: { Index: number }
+  Value: { UniqueId: number
+  Name: string}
+}
 
 type BossProduct = {
   UniqueId: number
   Name?: string
   CostVatExc?: number
+  Filter?: BossFilter[]
   Price?: BossPrice[]
   Category?: BossCats[]
   Active?: boolean
   ImageURL?: string
+  Barcode?: string
   ExternalInfo?: BossExInfo
 }
 
@@ -44,15 +53,18 @@ type BossProductsResponse = {
 }
 
 type BossStockRow = {
+      UniqueId: number
+  Active?: boolean
+
   ProductInfo?: { UniqueId: number }
   BranchInfo?: {
     UniqueId: number
+      Name?: string
     StorageAmounts?: {
       Current?: number
     }
-  }
-}
-
+  
+}}
 type BossStockResponse = {
   Results?: BossStockRow[]
 }
@@ -89,11 +101,14 @@ async function syncProducts(products: BossProduct[]) {
     id: p.UniqueId,
     name: p.Name ?? null,
     cost_vat_exc: p.CostVatExc ?? null,
+    barcode: p.Barcode ?? null,
+    filter: p.Filter ?? null,
     active: p.Active ?? null,
     prices: p.Price ?? null,
         categories: p.Category ?? null,
 external_info: p.ExternalInfo ?? null,
-    image_url: p.ImageURL ?? null
+    image_url: p.ImageURL ?? null,
+
   }))
 
   const { error } = await supabase
@@ -121,9 +136,12 @@ async function syncStock(products: BossProduct[]) {
         const stock = await fetchStockForProduct(product.UniqueId) as BossStockResponse
 
         const rows = (stock.Results ?? []).map(s => ({
+          id: s.UniqueId,
           product_id: s.ProductInfo?.UniqueId,
           branch_id: s.BranchInfo?.UniqueId,
-          quantity: s.BranchInfo?.StorageAmounts?.Current ?? 0
+          branch_name: s.BranchInfo?.Name ?? null,
+          current_stock: s.BranchInfo?.StorageAmounts?.Current ?? 0,
+          active: s.Active ?? null,
         }))
 
         if (rows.length > 0) {

@@ -47,13 +47,12 @@ import { button } from '~/styles.ts';
 כשמדובר בכלב שלך, רק המיטב מספיק
 </h2>
         <div class="flex flex-col md:flex-row gap-4 md:items-right">
-  <button class={` h-24 text-xl py-6 px-12 w-52 ${button({ theme:'light' })}`}>
+          <a href="/collections/" class={` h-24 text-xl py-6 px-12 w-52 ${button({ theme:'light' })}` } >
             גלו את המוצרים שלנו
-          </button>
-          <button class={` h-24 text-xl py-6 px-12 w-52 ${button({ theme:'ghost' })}`} >
+          </a>
+          <a href="/collections/?tags=מבצעים+לכלבים&tags=מבצעים&tags=מבצעים+לחתולים" class={` h-24   text-xl py-6 px-12 w-52 ${button({ theme:'ghost' })}`} >
             המבצעים שלנו
-          </button>
-
+          </a>
         
 
         </div>

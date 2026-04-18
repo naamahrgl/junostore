@@ -140,6 +140,38 @@ export async function fetchStockForProduct(productId: number): Promise<BossStock
   return res.json() as BossStockResponse
 }
 
+
+export async function fetchStocksFromBoss(): Promise<BossStockResponse>  {
+
+  const token = await getBossToken()
+
+  const url =
+    `${process.env.BOSS_API_URL}/api/ProductBranch`
+
+  console.log("👉 FETCH:", url)
+
+  const res = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  })
+
+
+  if (!res.ok) {
+    console.error(await res.text())
+    throw new Error("failed fetching products")
+  }
+
+const data = await res.json() as BossStockResponse
+  console.log("👉 full response keys:", Object.keys(data))
+
+  console.log(
+    `👉 got ${data.Results?.length ?? 0})`
+  )
+
+  return data
+}
+
 export async function fetchCustomersFromBoss(start = 0, max = 50): Promise<BossCustomersResponse> {
 
   const token = await getBossToken()
