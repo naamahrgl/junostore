@@ -48,6 +48,8 @@ const searchParams =
 
 const selectedTags =
   searchParams.getAll("tags")
+  const animalParam = searchParams.get("animal")
+
 
 const page =
   Number(
@@ -75,16 +77,20 @@ let collections =
   collectionsData?.items ?? []
 
 
+let filteredProducts = allProducts
 /* ------------------ */
 /* filter products */
 /* ------------------ */
 
-let filteredProducts =
+if (animalParam) {
+
+ filteredProducts =
   allProducts.filter((product: any) =>
 
     product.cat_dog?.includes(animal)
 
   )
+}
 
 
 /* filter by tags */
@@ -288,17 +294,17 @@ gap-6
 >
 {bigLeft ? (
   <>
-    <CategoryBig collection={big} href={`/collections/${big?.slug}?${searchParams.toString()}`} />
+    <CategoryBig collection={big} href={`/collections/${big?.slug}?animal=${animal}&${searchParams.toString()}`} />
     {small && (
-      <CategorySmall collection={small} href={`/collections/${small?.slug}?${searchParams.toString()}`} />
+      <CategorySmall collection={small} href={`/collections/${small?.slug}?animal=${animal}&${searchParams.toString()}`} />
     )}
   </>
 ) : (
   <>
     {small && (
-      <CategorySmall collection={small} href={`/collections/${small?.slug}?${searchParams.toString()}`} />
+      <CategorySmall collection={small} href={`/collections/${small?.slug}?animal=${animal}&${searchParams.toString()}`} />
     )}
-    <CategoryBig collection={big} href={`/collections/${big?.slug}?${searchParams.toString()}`} />
+    <CategoryBig collection={big} href={`/collections/${big?.slug}?animal=${animal}&${searchParams.toString()}`} />
   </>
 )}
 
