@@ -54,7 +54,7 @@ const allTags = Array.from(
     ...selectedTags
   ])
 ).sort();
-const filteredProducts =
+let filteredProducts =
   selectedTags.length === 0
     ? products
     : products.filter((product:any) =>
@@ -62,10 +62,93 @@ const filteredProducts =
           product.tags?.includes(tag)
         )
       );
+
+	  /* ------------------ */
+/* pagination */
+/* ------------------ */
+
+const page =
+  Number(
+	searchParams.page ?? 1
+  )
+
+const perPage = 24
+const totalPages =
+  Math.ceil(
+    filteredProducts.length / perPage
+  )
+
+filteredProducts =
+  filteredProducts.slice(
+
+    (page - 1) * perPage,
+
+    page * perPage
+
+  )
 ---
 
 <PrimaryLayout title={`Astro Shop | ${collection.name}`}>
+	<!-- pagination -->
+
+<div
+class="
+flex
+justify-center
+gap-2
+pt-8
+"
+>
+
+{
+
+Array.from({
+
+length: totalPages
+
+}).map((_,i)=>{
+
+const params =
+  new URLSearchParams(searchParams)
+
+params.set(
+"page",
+String(i+1)
+)
+
+return (
+
+<a
+
+href={`?${params.toString()}`}
+
+class={`
+px-3
+py-1
+border
+rounded
+
+${page === i+1
+? "bg-primary-500 text-white"
+: ""}
+
+`}
+
+>
+
+{i+1}
+
+</a>
+
+)
+
+})
+
+}
+
+</div>
 	<div class="pt-4">
+		
 		<SideColumnLayout class="flex flex-wrap gap-4">
 			<div slot="aside" class="flex flex-col gap-4 py-4">
 				<header>
@@ -172,6 +255,8 @@ ${isActive
 {filteredProducts.map((product:any) => (
 <ProductCard {...product} />
 ))}
+
+
 			</section>
 		</SideColumnLayout>
 	</div>

@@ -133,8 +133,8 @@ export function AddToCartForm(props: { product: Product }) {
 			<div class="sticky bottom-4 grid gap-2">
 				<Switch
 					fallback={
-						<Button type="submit" pending={mutation.isPending}>
-							Add to cart
+						<Button type="submit" pending={mutation.isPending} class='text-3xl'>
+							הוסף לסל
 						</Button>
 					}
 				>

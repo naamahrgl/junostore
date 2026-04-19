@@ -29,11 +29,41 @@ import type {
 
 export * from './client.types.ts';
 
+const processImages = (urlPath: string | null, productSlug: string) => {
+  const fallbackUrl = '/assets/cat1.jpg';
+  
+  if (!urlPath) {
+    return { 
+      main: fallbackUrl, 
+      all: [{ id: `${productSlug}-0`, url: fallbackUrl }] 
+    };
+  }
+
+  const parts = urlPath.split(';').map((part, idx) => {
+    const trimmed = part.trim();
+    if (!trimmed) return null;
+
+    // Handle Wix IDs vs full URLs
+    const url = trimmed.startsWith('http') 
+      ? trimmed 
+      : `https://wixstatic.com{trimmed}`;
+
+    return {
+      id: `${productSlug}-${idx}`, // ID must be a string
+      url: url
+    };
+  }).filter((item): item is { id: string; url: string } => item !== null);
+
+  return {
+    main: parts[0]?.url || fallbackUrl,
+    all: parts.length > 0 ? parts : [{ id: `${productSlug}-0`, url: fallbackUrl }]
+  };
+};
+
+
 export const getProducts = async (options?: any) => {
-  // 1. Ensure you use the correct table name (products or products_clean)
   let query = supabase.from('products_clean').select('*'); 
 
-  // 2. Fix column name to match RAW data: 'collectionids'
   if (options?.query?.collectionId) {
     query = query.contains('collectionids', [options.query.collectionId]);
   }
@@ -41,15 +71,19 @@ export const getProducts = async (options?: any) => {
   const { data, error } = await query;
   if (error) return asError(error);
 
-  const formattedItems = data?.map(p => ({
-    ...productDefaults,
-    ...p,
-    id: p.slug, 
-    imageUrl: p.imageurl || 'https://static.wixstatic.com/media/823c2d_d4cebb159b9a4875a2a3c9bba6483612~mv2.png', // RAW data has 'imageurl'
-    price: (p.price || 0) * 100, // RAW data has 'price' at 100
-    collectionIds: p.collectionids || [], // RAW data has 'collectionids'
-
-  }));
+  const formattedItems = data?.map(p => {
+    // 🚀 FIX: Move processing INSIDE the map so 'p' is defined
+    const { main, all } = processImages(p.imageurl, p.slug);     
+    return {
+      ...productDefaults,
+      ...p,
+      id: p.slug, 
+      imageUrl: main,
+      images: all,
+      price: (p.price || 0) * 100,
+      collectionIds: p.collectionids || [],
+    };
+  });
 
   return asResult({ items: formattedItems, next: null }) as any;
 };
@@ -92,12 +126,14 @@ export const getProductById = async <ThrowOnError extends boolean = false>(
 		        stock: p.stock ?? 1,
         options: {} // Empty options = "Add to Cart" mode
       }];
+    const { main, all } = processImages(p.imageurl, p.slug); 
 
   const formattedProduct = {
     ...productDefaults,
     ...p,
     id: p.slug,
-    imageUrl: p.imageurl || 'https://static.wixstatic.com/media/823c2d_d4cebb159b9a4875a2a3c9bba6483612~mv2.png', // RAW,
+    imageUrl: main, // RAW,
+images:all,
     price: (p.price || 0) * 100,
     collectionIds: p.collectionids || [],
     variants: dynamicVariants,
