@@ -9,7 +9,10 @@ export default function LoginForm() {
     setLoading(true)
 
     const { error } = await supabase.auth.signInWithOtp({
-      email: email()
+      email: email(),
+        options: {
+    emailRedirectTo: `${window.location.origin}/auth/callback`
+  }
     })
 
     if (error) {
@@ -23,7 +26,10 @@ export default function LoginForm() {
 
   async function signInWithGoogle() {
     await supabase.auth.signInWithOAuth({
-      provider: "google"
+      provider: "google",
+  options: {
+    redirectTo: `${window.location.origin}/auth/callback`
+  }
     })
   }
 
@@ -49,7 +55,7 @@ export default function LoginForm() {
       <button
         onClick={signInWithEmail}
         disabled={loading()}
-        class="w-full bg-blue-600 text-white rounded-xl p-3"
+        class="w-full bg-theme-base-600 text-white rounded-xl p-3"
       >
         הירשמו
       </button>

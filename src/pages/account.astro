@@ -1,0 +1,91 @@
+---
+import { applyDefaultCacheHeaders } from '~/config.ts';
+import PrimaryLayout from '~/layouts/PrimaryLayout.astro';
+import SideColumnLayout from '~/layouts/SideColumnLayout.astro';
+import { button } from '~/styles.ts';
+
+applyDefaultCacheHeaders(Astro.response.headers);
+
+---
+
+<PrimaryLayout title="החשבון שלי">
+  <div class="pt-8">
+    <SideColumnLayout>
+      <!-- SIDEBAR -->
+      <div slot="aside" class="flex flex-col gap-6 py-4">
+        <div class="space-y-2">
+          <h2 class="text-2xl font-bold text-theme-base-600">היי, חבר! 👋</h2>
+          <p class="text-sm opacity-70">ברוכים השבים לג'ונו</p>
+        </div>
+
+        <nav class="flex flex-col gap-2">
+          <a href="/account/#lastorder" class="font-bold text-primary-500">הזמנה אחרונה</a>
+          <a href="/account/#points" class="hover:text-primary-500">נקודות ורמות</a>
+          <a href="/account/#points" class="hover:text-primary-500">פרטי חשבון</a>
+        </nav>
+
+        <button id="logout-btn" class={button({ theme: 'ghost' })}>
+          התנתקות
+        </button>
+      </div>
+
+      <!-- MAIN CONTENT (Figma Layout) -->
+      <section slot="main" class="space-y-12 pb-20">
+        <!-- Dashboard Header / Last Order -->
+        <div id="lastorder" class="bg-white border rounded-2xl p-8 shadow-sm">
+          <h3 class="h4 mb-6">הזמנה אחרונה</h3>
+          <div class="flex gap-6 items-center">
+             <div class="bg-gray-100 rounded-xl h-32 w-32 flex items-center justify-center text-gray-400">
+               📦
+             </div>
+             <div>
+               <p class="font-bold">רויאל קנין מקסי אדאלט</p>
+               <p class="text-sm opacity-70">הוזמן בתאריך: 24/04/2026</p>
+               <p class="text-primary-500 font-bold mt-2">₪259</p>
+             </div>
+          </div>
+        </div>
+
+        <!-- Points Card (Orange one from Figma) -->
+        <div id="point" class="bg-theme-base-50 rounded-3xl p-10 text-white relative overflow-hidden shadow-xl">
+           <div class="relative z-10">
+              <span class="text-sm uppercase tracking-widest opacity-80">נקודות צבורות</span>
+              <div class="text-7xl font-black mt-2">2,340 <span class="text-2xl">PTS</span></div>
+              <p class="mt-4 opacity-90">נשאר לך עוד מעט להגיע לרמת GOLD!</p>
+           </div>
+           <!-- Abstract circle decoration -->
+           <div class="absolute -right-10 -bottom-10 w-64 h-64 bg-orange-400 rounded-full opacity-30"></div>
+        </div>
+      </section>
+    </SideColumnLayout>
+  </div>
+</PrimaryLayout>
+<script>
+  import { supabase } from "../lib/supabase";
+
+  // This runs in the browser. It detects the #access_token in the URL,
+  // establishes the session, and saves it to local storage.
+  const { data } = await supabase.auth.getSession();
+  
+  if (data.session) {
+    console.log("Logged in!");
+  } else {
+    window.location.href = "/login";
+  }
+</script>
+<script>
+  import { supabase } from "~/lib/supabase";
+
+  // LOGOUT LOGIC
+  const logoutBtn = document.getElementById("logout-btn");
+  logoutBtn?.addEventListener("click", async () => {
+    await supabase.auth.signOut();
+    // Clear the cookies so the server knows we're out
+    document.cookie = "sb-access-token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+    document.cookie = "sb-refresh-token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+    window.location.href = "/login";
+  });
+</script>
+
+
+

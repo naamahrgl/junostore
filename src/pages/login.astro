@@ -1,11 +1,25 @@
 ---
-import LoginForm from "../components/form"
+import LoginForm from "../components/LoginForm"
 import PrimaryLayout from '~/layouts/PrimaryLayout.astro';
 import twoXl from '~/assets/footerlogo.png';
-
+// If session cookie exists, skip login page entirely
+if (Astro.cookies.has("sb-access-token")) {
+  return Astro.redirect("/account");
+}
 ---
 
 <PrimaryLayout title="Login">
+  <script>
+  import { supabase } from "../lib/supabase";
+
+  const { data } = await supabase.auth.getSession();
+  
+  // If a session exists, go straight to account
+  if (data.session) {
+    window.location.href = "/account";
+  }
+</script>
+
 <div class=" flex flex-col md:flex-row items-center justify-center ">
 
     <!-- LEFT -->

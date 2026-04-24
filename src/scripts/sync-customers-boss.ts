@@ -15,10 +15,12 @@ type BossPhone = {
 
 type BossAddress = {
   UniqueId: number
-  City?: { Name: string }
-  Street?: { Name: string }
+  ActorType?: string
+  ActorUniqueId?: number
+  City?: {   UniqueId: number; Name: string }
+  Street?: {   UniqueId: number; Name: string }
   HouseNum?: string
-  UsageTypes?: Record<string, boolean>
+  UsageTypes?: { Main?: boolean; Home?: boolean; Work?: boolean; Delivery?: boolean; Post?: boolean }[]
 }
 
 type BossCustomer = {
@@ -26,15 +28,20 @@ type BossCustomer = {
   Status: string
   FirstName: string
   LastName: string
+  Email?: string
   HasPassWord?: boolean
   Phone?: BossPhone[]
   Address?: BossAddress
+  HasMultipleAddresses?: boolean
   SmsAllowed?: boolean
   EmailAllowed?: boolean
   WhatsAppAllowed?: boolean
+  PostOfficeAllowed?: boolean
   NumOfMoveMents?: number
-  RewardPoints?: any
-  AssociatedBranch?: any
+  RewardPoints?: { Accumulate?: number}
+  AssociatedBranch?: {   UniqueId: number; Name: string }
+  StoragePriceNum?: number
+  HasSubActors?: boolean
 }
 
 type BossCustomersResponse = {
@@ -74,16 +81,21 @@ async function syncCustomers(customers: BossCustomer[]) {
     has_password: c.HasPassWord ?? false,
     
     // Mapping complex objects to JSONB columns
-    phone_numbers: c.Phone ?? [], 
+    phone_numbers: c.Phone ?? null, 
     address: c.Address ?? null,
-    reward_points: c.RewardPoints ?? {},
-    associated_branch: c.AssociatedBranch ?? {},
+    email: c.Email ?? null,
+    has_multiple_addresses: c.HasMultipleAddresses ?? false,
+    reward_points: c.RewardPoints ?? null,
+    associated_branch: c.AssociatedBranch ?? null,
     
     // Permissions & Stats
     sms_allowed: c.SmsAllowed ?? false,
     email_allowed: c.EmailAllowed ?? false,
     whatsapp_allowed: c.WhatsAppAllowed ?? false,
+    post_office_allowed: c.PostOfficeAllowed ?? false,
     num_of_movements: c.NumOfMoveMents ?? 0,
+    storage_price_num: c.StoragePriceNum ?? null,
+    has_sub_actors: c.HasSubActors ?? false,
     
     updated_at: new Date().toISOString()
   }))
