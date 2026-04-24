@@ -25,8 +25,8 @@ export const cart = {
 				query: {},
 			});
 
-			const product = products.data?.items.find((product) =>
-				product.variants.some((variant) => variant.id === input.productVariantId),
+			const product = products.data?.items.find((product:any) =>
+				product.variants.some((variant:any) => variant.id === input.productVariantId),
 			);
 
 			if (!product) {

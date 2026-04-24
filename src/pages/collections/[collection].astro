@@ -246,18 +246,16 @@ ${isActive
 </nav>
 			</div>
 
-			<section
-				slot="main"
-				class="grid grid-cols-[repeat(auto-fill,minmax(16rem,1fr))] gap-4"
-				aria-labelledby="products-heading"
-				aria-label="Products"
-			>
-{filteredProducts.map((product:any) => (
-<ProductCard {...product} />
-))}
+<section
+  slot="main"
+  class="grid grid-cols-2 md:grid-cols-3 gap-6" 
+  aria-label="Products"
+>
+  {filteredProducts.map((product: any) => (
+    <ProductCard {...product} />
+  ))}
+</section>
 
-
-			</section>
 		</SideColumnLayout>
 	</div>
 </PrimaryLayout>

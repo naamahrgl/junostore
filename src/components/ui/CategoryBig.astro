@@ -1,7 +1,7 @@
 ---
 import Emoji from 'astro-emoji'
 
-const { collection, href } = Astro.props
+const { collection, href, count } = Astro.props
 ---
 
 <a
@@ -36,13 +36,12 @@ transition
 {collection.name}
 
 </h2>
+  <!-- Display the count here -->
+    <p class="opacity-60">
+      {count ?? 0} מוצרים
+    </p>
 
 
-<p class="opacity-70">
-
-{collection.description}
-
-</p>
 
 </div>
 

@@ -28,6 +28,14 @@ const products =
 
 let collections =
   collectionsData?.items ?? []
+  // Create a map of collectionId -> count
+const collectionCounts = products.reduce((acc: Record<string, number>, product: any) => {
+  product.collectionIds?.forEach((id: string) => {
+    acc[id] = (acc[id] || 0) + 1;
+  });
+  return acc;
+}, {});
+
 
 
 /* ------------------ */
@@ -209,33 +217,22 @@ inline-block
 
 <!-- filters -->
 
-<div class="flex flex-wrap gap-2 justify-center">
+<details class="group  w-full px-4 mb-4">
+  <summary class="list-none flex items-center justify-center gap-2 p-3 border rounded-xl cursor-pointer bg-white text-theme-base-600 font-bold">
+    <span>פילטרים</span>
+    <span class="transition-transform group-open:rotate-180">▼</span>
+  </summary>
+  
+  <div class="flex flex-wrap gap-2 justify-center mt-4 p-4 border rounded-xl ">
+    {allTags.filter(tag => typeof tag === 'string').map((tag) => (
+      <a href={buildTagUrl(tag as string)} class={`px-3 py-1 border rounded-xl ${selectedTags.includes(tag as string) ? "bg-theme-base-100 text-theme-base-50" : "border-theme-base-50 "}`}>
+        {tag}
+      </a>
+    ))}
+  </div>
+</details>
 
-{
-  allTags.filter(tag => typeof tag === 'string').map((tag) => (
 
-<a
-href={buildTagUrl(tag as string)}
-class={`
-px-3
-py-1
-border
-rounded
-inline-block
-
-${selectedTags.includes(tag as string)
-  ? "bg-theme-base-100 text-theme-base-50 border-theme-base-100"
-  : "border-theme-base-50"
-}
-`}
->
-{tag}
-</a>
-
-))
-}
-
-</div>
 
 
 
@@ -277,10 +274,10 @@ bigLeft
 ? (
 <>
 
-<CategoryBig collection={big} href={`/collections/${big?.slug}${qs}`}/>
+<CategoryBig collection={big} href={`/collections/${big?.slug}${qs}`}  count={collectionCounts[big?.id ?? '']} />
 
 {small && (
-<CategorySmall collection={small} href={`/collections/${small?.slug}${qs}`}/>
+<CategorySmall collection={small} href={`/collections/${small?.slug}${qs}`} count={collectionCounts[small?.id ?? '']} />
 )}
 
 </>
@@ -292,10 +289,10 @@ bigLeft
 <>
 
 {small && (
-<CategorySmall collection={small} href={`/collections/${small?.slug}${qs}`}/>
+<CategorySmall collection={small} href={`/collections/${small?.slug}${qs}`} count={collectionCounts[small?.id ?? '']} />
 )}
 
-<CategoryBig collection={big} href={`/collections/${big?.slug}${qs}`}/>
+<CategoryBig collection={big} href={`/collections/${big?.slug}${qs}`} count={collectionCounts[big?.id ?? '']} />
 
 </>
 

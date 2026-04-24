@@ -62,31 +62,65 @@ const processImages = (urlPath: string | null, productSlug: string) => {
 
 
 export const getProducts = async (options?: any) => {
-  let query = supabase.from('products_clean').select('*'); 
+  let query = supabase.from('products_clean').select('*');
 
+  // 1. Filter by Collection
   if (options?.query?.collectionId) {
     query = query.contains('collectionids', [options.query.collectionId]);
+  }
+
+  // 2. Filter by Specific IDs/Slugs (Critical for Cart & specific lookups)
+  if (options?.query?.ids) {
+    const ids = Array.isArray(options.query.ids) ? options.query.ids : [options.query.ids];
+    query = query.in('slug', ids);
+  }
+
+  // 3. Sorting (Handled by Supabase for better performance)
+  if (options?.query?.sort === 'price' && options?.query?.order) {
+    query = query.order('price', { ascending: options.query.order === 'asc' });
+  } else if (options?.query?.sort === 'name' && options?.query?.order) {
+    query = query.order('name', { ascending: options.query.order === 'asc' });
   }
 
   const { data, error } = await query;
   if (error) return asError(error);
 
   const formattedItems = data?.map(p => {
-    // 🚀 FIX: Move processing INSIDE the map so 'p' is defined
-    const { main, all } = processImages(p.imageurl, p.slug);     
-    return {
-      ...productDefaults,
-      ...p,
-      id: p.slug, 
-      imageUrl: main,
-      images: all,
-      price: (p.price || 0) * 100,
-      collectionIds: p.collectionids || [],
-    };
+    const { main, all } = processImages(p.imageurl, p.slug);
+    
+  const hasVariants = Array.isArray(p.filter_values) && p.filter_values.length > 0 && p.filter_values[0] !== null;
+
+  return {
+    ...productDefaults,
+    ...p,
+    id: p.slug,
+    imageUrl: main,
+    images: all,
+    price: (p.price || 0) * 100,
+    collectionIds: p.collectionids || [],
+    
+    variants: hasVariants
+      ? p.filter_values.map((val: string, index: number) => ({
+          id: `${p.slug}-${index}`, 
+          name: val,
+          stock: p.stock ?? 10,
+          options: { [p.filter_name || 'Size']: val } 
+        }))
+      : [{
+          ...defaultVariant,
+          id: `${p.slug}-default`, // 🚀 MUST include slug to avoid "sample product" bug
+          name: 'Default',
+          stock: p.stock ?? 1,
+          options: {} // 🚀 MUST be empty to show "Add to Cart"
+        }],
+  };
+
+
   });
 
   return asResult({ items: formattedItems, next: null }) as any;
 };
+
 
 export const getProductById = async <ThrowOnError extends boolean = false>(
   options: Options<GetProductByIdData, ThrowOnError>
@@ -109,23 +143,23 @@ export const getProductById = async <ThrowOnError extends boolean = false>(
   }
   // 1. Logic to check if real variants exist
   // We filter out nulls or empty strings from filter_values
-  const validValues = p.filter_values?.filter((v: any) => v !== null && v !== "");
-  const hasVariants = validValues && validValues.length > 0;
+  const hasVariants = Array.isArray(p.filter_values) && p.filter_values.length > 0 && p.filter_values[0] !== null;
+
 
   const dynamicVariants = hasVariants
-    ? validValues.map((val: string, index: number) => ({
-        id: `${p.slug}-${index}`,
-        name: val,
-        stock: p.stock ?? 0, // RAW data has 'stock'
-        options: { [p.filter_name || 'Option']: val } // Forces "Select Style"
-      }))
-    : [{
-        ...defaultVariant,
-        id: 'default',
-        name: 'Default',
-		        stock: p.stock ?? 1,
-        options: {} // Empty options = "Add to Cart" mode
-      }];
+    ? p.filter_values.map((val: string, index: number) => ({
+          id: `${p.slug}-${index}`, 
+          name: val,
+          stock: p.stock ?? 10,
+          options: { [p.filter_name || 'Size']: val } 
+        }))
+      : [{
+          ...defaultVariant,
+          id: `${p.slug}-default`, // 🚀 MUST include slug to avoid "sample product" bug
+          name: 'Default',
+          stock: p.stock ?? 1,
+          options: {} // 🚀 MUST be empty to show "Add to Cart"
+        }];
     const { main, all } = processImages(p.imageurl, p.slug); 
 
   const formattedProduct = {
@@ -228,7 +262,7 @@ const collections: Record<string, Collection> = {
 		name: 'מזון יבש',
 		description: 'Wear your love for Astro on your sleeve.',
 		slug: 'dryfood',
-		emoji: '🚀',
+		emoji: '🥩',
 		...collectionDefaults,
 	},
 			vet: {
@@ -236,7 +270,7 @@ const collections: Record<string, Collection> = {
 		name: 'מזון רפואי',
 		description: 'Wear your love for Astro on your sleeve.',
 		slug: 'vet',
-		emoji: '🚀',
+		emoji: '🦴',
 		...collectionDefaults,
 	},
 			pestcontrol: {
@@ -252,7 +286,7 @@ const collections: Record<string, Collection> = {
 		name: 'משחקים',
 		description: 'Wear your love for Astro on your sleeve.',
 		slug: 'toys',
-		emoji: '🚀',
+		emoji: '🎾',
 		...collectionDefaults,
 	},
 			cans: {
@@ -260,7 +294,7 @@ const collections: Record<string, Collection> = {
 		name: 'שימורים ומעדנים',
 		description: 'Wear your love for Astro on your sleeve.',
 		slug: 'cans',
-		emoji: '🚀',
+		emoji: '🍖',
 		...collectionDefaults,
 	},
 			teeth: {
@@ -268,7 +302,7 @@ const collections: Record<string, Collection> = {
 		name: 'שיניים',
 		description: 'Wear your love for Astro on your sleeve.',
 		slug: 'teeth',
-		emoji: '🚀',
+		emoji: '🛁',
 		...collectionDefaults,
 	},
 				leash: {
@@ -276,7 +310,7 @@ const collections: Record<string, Collection> = {
 		name: 'רצועות',
 		description: 'Wear your love for Astro on your sleeve.',
 		slug: 'leash',
-		emoji: '🚀',
+		emoji: '🦮',
 		...collectionDefaults,
 	},
 

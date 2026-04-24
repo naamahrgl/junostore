@@ -1,0 +1,63 @@
+---
+import PrimaryLayout from "~/layouts/PrimaryLayout.astro";
+import twoXl from '~/assets/footerlogo.png';
+//import { createBossCustomer } from "~/lib/boss-client.ts";
+import { supabase } from "~/lib/supabase.ts";
+
+// Handle Form Submission
+if (Astro.request.method === "POST") {
+  try {
+    const data = await Astro.request.formData();
+    const firstName = data.get("firstName") as string;
+    const lastName = data.get("lastName") as string;
+    const email = data.get("email") as string;
+    const phone = data.get("phone") as string;
+
+    // 1. Create in Boss
+     //const bossUser = await createBossCustomer({ firstName, lastName, email, phone });
+
+    // 2. Trigger Supabase Magic Link
+     await supabase.auth.signInWithOtp({ email });
+
+    return Astro.redirect("/login?sent=true");
+  } catch (e) {
+    console.error(e);
+  }
+}
+---
+
+<PrimaryLayout title="הצטרפות לג'ונו">
+  <div class="flex flex-col md:flex-row min-h-[70vh]">
+    <!-- LEFT: FORM -->
+    <div class="flex items-center justify-center p-8 md:w-1/2">
+      <div class="w-full max-w-md space-y-8">
+        <div class="text-center">
+          <h1 class="text-3xl font-black text-theme-base-600">הצטרפו למשפחה 🐾</h1>
+          <p class="text-orange-500 mt-2">צבירת נקודות, הטבות ומעקב הזמנות</p>
+        </div>
+
+        <form method="POST" class="space-y-4">
+          <div class="grid grid-cols-2 gap-4">
+            <input name="firstName" placeholder="שם פרטי" required class="border rounded-xl p-3 w-full" />
+            <input name="lastName" placeholder="שם משפחה" required class="border rounded-xl p-3 w-full" />
+          </div>
+          <input type="email" name="email" placeholder="אימייל" required class="border rounded-xl p-3 w-full" />
+          <input type="tel" name="phone" placeholder="טלפון" required class="border rounded-xl p-3 w-full text-right" />
+          
+          <button type="submit" class="w-full bg-theme-base-600 text-white font-bold rounded-xl p-4 hover:bg-opacity-90 transition">
+            יצירת חשבון
+          </button>
+        </form>
+
+        <p class="text-center text-sm text-gray-500">
+          כבר רשומים? <a href="/login" class="text-theme-base-600 font-bold underline">התחברו כאן</a>
+        </p>
+      </div>
+    </div>
+
+    <!-- RIGHT: VISUAL -->
+    <div class="hidden md:flex items-center justify-center bg-theme-base-600 md:w-1/2 rounded-l-[40px]">
+      <img src={twoXl.src} class="h-[400px] object-contain" alt="Juno Logo" />
+    </div>
+  </div>
+</PrimaryLayout>

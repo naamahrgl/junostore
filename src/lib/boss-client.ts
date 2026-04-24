@@ -236,6 +236,39 @@ console.log("👉 MaxAvailableResults:", (data as any).MaxAvailableResults)
   return data
 }
 
+export async function createBossCustomer(formData: { firstName: string, lastName: string, email: string, phone: string }) {
+  // Inside getBossToken
+console.log("🔑 Auth Attempt with:", process.env.BOSS_USERNAME); 
+// Check if this prints 'undefined' or the wrong username
+
+  const token = await getBossToken();
+  const url = `${process.env.BOSS_API_URL}/api/Client`;
+
+  const body = {
+    FirstName: formData.firstName,
+    LastName: formData.lastName,
+    Email: formData.email,
+    Phone: [{ Number: formData.phone }]
+  };
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(body)
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    console.error("❌ Boss API Error Details:", errorText); // This will tell you if it's a validation error
+    throw new Error(`Failed to create customer: ${res.status}`);
+  }
+
+  return await res.json();
+}
+
+
 export async function findCustomerByEmail(){}
-export async function createCustomer(){}
 export async function createOrder(){}
