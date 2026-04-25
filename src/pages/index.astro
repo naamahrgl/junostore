@@ -3,7 +3,6 @@ import CollectionDesSection from '~/features/designedcollection/CollectionDesSec
 import LandingHero from '~/components/LandingHero.astro';
 import { applyDefaultCacheHeaders } from '~/config.ts';
 import PrimaryLayout from '~/layouts/PrimaryLayout.astro';
-import FeatureNumbers from '~/components/ui/FeatureNumbers.astro';
 import FeaturedCollectionSection from '~/features/featuredcollection/FeaturedCollectionSection.astro';
 
 applyDefaultCacheHeaders(Astro.response.headers);
@@ -12,8 +11,7 @@ applyDefaultCacheHeaders(Astro.response.headers);
 
 <PrimaryLayout title="Astro Shop">
 	<LandingHero  />
-<FeatureNumbers />
-	<main class="breakout mt-16 flex flex-col gap-y-16">
+	<main class="breakout  flex flex-col  ">
 
 <FeaturedCollectionSection />
 		<CollectionDesSection />

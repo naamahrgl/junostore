@@ -6,7 +6,7 @@ import Card from '~/components/ui/Card.tsx';
 import { formatProductPrice } from '~/lib/currency.ts';
 import { productPath } from '~/paths.ts';
 import { ProductPrice } from './ProductPrice.tsx';
-import { AddToCartForm } from '~/features/cart/AddToCartForm.tsx';
+import {TinyAddToCartForm} from '~/features/cart/TinyAddToCartForm.tsx';
 
 interface Props extends Product {
 	class?: string;
@@ -16,43 +16,46 @@ interface Props extends Product {
 
 const { class: className, elementId, imageLoading, ...product } = Astro.props;
 ---
-<div>
-<a
-	href={productPath(product.slug)}
-	class={twMerge(`group relative block w-full focus-visible:ring-0 `, className)}
-	id={elementId ?? undefined}
-	aria-label={`${product.name} for ${formatProductPrice(product.price)}`}
+
+<div 
+    class={twMerge(`group relative  flex flex-col w-full  shadow-md rounded-2xl p-4 bg-white`, className)} 
+    id={elementId ?? undefined}
 >
-	<article>
-		<Card class="flex aspect-[5/6] items-center justify-center ">
-			<Image
-				src={new URL(product.imageUrl, Astro.url).href}
-				alt={product.name}
-				width={290}
-				height={290}
-				    class="w-full h-full object-contain p-4" 
+    {/* 1. Main Link Area - 'flex-grow' ensures this fills all vertical space */}
+    <a 
+        href={productPath(product.slug)} 
+        class="focus-visible:ring-2 flex flex-col flex-grow mb-4"
+        aria-label={`${product.name} for ${formatProductPrice(product.price)}`}
+    >
+        <article class="flex flex-col flex-grow">
+            <Card class="flex aspect-[5/6] items-center justify-center shrink-0">
+                <Image
+                    src={new URL(product.imageUrl, Astro.url).href}
+                    alt={product.name}
+                    width={290}
+                    height={290}
+                    loading={imageLoading ?? 'lazy'}
+                    densities={[1, 1.5, 2]}
+                    draggable="false"
+                />
+            </Card>
+            
+            {/* This div holds text. flex-grow here ensures the spacing stays consistent */}
+            <div class="flex flex-col gap-2 p-2 font-medium flex-grow">
+<h3 class="text-pretty leading-tight text-theme-base-900 line-clamp-2 min-h-[2.5rem]">
+    {product.name}
+</h3>                <p class="text-lg/tight text-theme-base-600 mt-auto">
+                    <ProductPrice price={product.price} discount={product.discount} />
+                </p>
+            </div>
+        </article>
 
-				loading={imageLoading ?? 'lazy'}
-				densities={[1, 1.5, 2]}
-				draggable="false"
-			/>
-		</Card>
-		<div class="flex flex-col gap-2 p-2 font-medium">
-			<h3 class="text-pretty leading-tight text-theme-base-900">{product.name}</h3>
-			
-			<p class="text-lg/tight text-theme-base-600">
-				<ProductPrice price={product.price} discount={product.discount} />
-			</p>
-		
-		</div>
-	</article>
-	<div
-		class="pointer-events-none absolute inset-0 ring-inset ring-theme-base-900 group-focus-visible:ring-2"
-	>
+        <div class="pointer-events-none absolute inset-0 ring-inset ring-theme-base-900 group-focus-visible:ring-2 rounded-2xl"></div>
+    </a>
 
-	</div>
-</a>
-		 <div class="mt-auto">
-    <AddToCartForm product={product} client:load />
-  </div>
+    {/* 2. Tiny Add to Cart - Stays at the very bottom */}
+    <div class="relative z-10 mt-auto">
+        <TinyAddToCartForm product={product} client:load />
+    </div>
 </div>
+

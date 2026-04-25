@@ -27,14 +27,17 @@ if (Astro.request.method === "POST") {
 ---
 
 <PrimaryLayout title="הצטרפות לג'ונו">
-  <div class="flex flex-col md:flex-row min-h-[70vh]">
-    <!-- LEFT: FORM -->
-    <div class="flex items-center justify-center p-8 md:w-1/2">
-      <div class="w-full max-w-md space-y-8">
-        <div class="text-center">
+  <div class="relative min-h-screen w-full flex flex-col md:flex-row overflow-hidden">
+    
+    <!-- THE BLUE BACKGROUND (Desktop Only) -->
+    <!-- This div "breaks out" by being absolute and covering the right 50% -->
+    <div class="hidden md:block absolute top-0 bottom-0 right-0 w-1/2 bg-theme-base-600 z-0"></div>
+
+    <!-- LEFT: FORM SIDE -->
+    <div class="relative z-10 flex flex-1 items-center justify-center p-8 bg-white min-h-[50vh] md:min-h-screen">
+      <div class="w-full max-w-md text-center space-y-6">
           <h1 class="text-3xl font-black text-theme-base-600">הצטרפו למשפחה 🐾</h1>
           <p class="text-orange-500 mt-2">צבירת נקודות, הטבות ומעקב הזמנות</p>
-        </div>
 
         <form method="POST" class="space-y-4">
           <div class="grid grid-cols-2 gap-4">
@@ -49,15 +52,23 @@ if (Astro.request.method === "POST") {
           </button>
         </form>
 
+
         <p class="text-center text-sm text-gray-500">
           כבר רשומים? <a href="/login" class="text-theme-base-600 font-bold underline">התחברו כאן</a>
         </p>
       </div>
     </div>
 
+
     <!-- RIGHT: VISUAL -->
-    <div class="hidden md:flex items-center justify-center bg-theme-base-600 md:w-1/2 rounded-l-[40px]">
+    <div class="relative z-10 hidden bg-theme-base-600 md:flex flex-1 items-center justify-center min-h-screen">
       <img src={twoXl.src} class="h-[400px] object-contain" alt="Juno Logo" />
     </div>
+        <!-- MOBILE LOGO VIEW (Optional: shows blue bar on mobile top/bottom if you want) -->
+    <div class="md:hidden bg-theme-base-600 p-8 flex justify-center mb-6">
+       <img src={twoXl.src} class="h-32 object-contain" alt="Logo" />
+    </div>
+                        </div>
+
   </div>
 </PrimaryLayout>

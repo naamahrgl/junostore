@@ -46,7 +46,7 @@ const processImages = (urlPath: string | null, productSlug: string) => {
     // Handle Wix IDs vs full URLs
     const url = trimmed.startsWith('http') 
       ? trimmed 
-      : `https://wixstatic.com{trimmed}`;
+      : `https://static.wixstatic.com/media/`+trimmed;
 
     return {
       id: `${productSlug}-${idx}`, // ID must be a string
@@ -104,7 +104,7 @@ export const getProducts = async (options?: any) => {
           id: `${p.slug}-${index}`, 
           name: val,
           stock: p.stock ?? 10,
-          options: { [p.filter_name || 'Size']: val } 
+          options: { [p.filter_name || null]: val } 
         }))
       : [{
           ...defaultVariant,
@@ -138,7 +138,7 @@ export const getProductById = async <ThrowOnError extends boolean = false>(
     if (options.throwOnError) throw errorResponse;
     return errorResponse as any;
   }
-  if (slug.includes('felix')) {
+  if (slug.includes('flamingo')) {
     console.log("🐱 FELIX DATA:", JSON.stringify(p, null, 2));
   }
   // 1. Logic to check if real variants exist
@@ -151,7 +151,7 @@ export const getProductById = async <ThrowOnError extends boolean = false>(
           id: `${p.slug}-${index}`, 
           name: val,
           stock: p.stock ?? 10,
-          options: { [p.filter_name || 'Size']: val } 
+          options: { [p.filter_name || null]: val } 
         }))
       : [{
           ...defaultVariant,
@@ -161,7 +161,11 @@ export const getProductById = async <ThrowOnError extends boolean = false>(
           options: {} // 🚀 MUST be empty to show "Add to Cart"
         }];
     const { main, all } = processImages(p.imageurl, p.slug); 
+  if (slug.includes('flamingo')) {
+    console.log("🐱 FELIX DATA:", JSON.stringify(all, null, 2));
+	    console.log("🐱 FELIX DATA:", JSON.stringify(main, null, 2));
 
+  }
   const formattedProduct = {
     ...productDefaults,
     ...p,
@@ -260,7 +264,9 @@ const collections: Record<string, Collection> = {
 		dryfood: {
 		id: 'dryfood',
 		name: 'מזון יבש',
-		description: 'Wear your love for Astro on your sleeve.',
+		description: "תזונה מדויקת המבוססת על מחקר — מותאמת לשלב בחיים, גודל הגזע, ומצב הבריאות של הכלב שלך.",
+		
+		
 		slug: 'dryfood',
 		emoji: '🥩',
 		...collectionDefaults,
@@ -268,7 +274,7 @@ const collections: Record<string, Collection> = {
 			vet: {
 		id: 'vet',
 		name: 'מזון רפואי',
-		description: 'Wear your love for Astro on your sleeve.',
+		description: "תזונה מדויקת המבוססת על מחקר — מותאמת לשלב בחיים, גודל הגזע, ומצב הבריאות של הכלב שלך.",
 		slug: 'vet',
 		emoji: '🦴',
 		...collectionDefaults,
@@ -276,7 +282,7 @@ const collections: Record<string, Collection> = {
 			pestcontrol: {
 		id: 'pestcontrol',
 		name: 'הדברה',
-		description: 'Wear your love for Astro on your sleeve.',
+		description: "תזונה מדויקת המבוססת על מחקר — מותאמת לשלב בחיים, גודל הגזע, ומצב הבריאות של הכלב שלך.",
 		slug: 'pestcontrol',
 		emoji: '🚀',
 		...collectionDefaults,
@@ -284,7 +290,7 @@ const collections: Record<string, Collection> = {
 			toys: {
 		id: 'toys',
 		name: 'משחקים',
-		description: 'Wear your love for Astro on your sleeve.',
+		description: "תזונה מדויקת המבוססת על מחקר — מותאמת לשלב בחיים, גודל הגזע, ומצב הבריאות של הכלב שלך.",
 		slug: 'toys',
 		emoji: '🎾',
 		...collectionDefaults,
@@ -292,7 +298,7 @@ const collections: Record<string, Collection> = {
 			cans: {
 		id: 'cans',
 		name: 'שימורים ומעדנים',
-		description: 'Wear your love for Astro on your sleeve.',
+		description: "תזונה מדויקת המבוססת על מחקר — מותאמת לשלב בחיים, גודל הגזע, ומצב הבריאות של הכלב שלך.",
 		slug: 'cans',
 		emoji: '🍖',
 		...collectionDefaults,
@@ -300,7 +306,7 @@ const collections: Record<string, Collection> = {
 			teeth: {
 		id: 'teeth',
 		name: 'שיניים',
-		description: 'Wear your love for Astro on your sleeve.',
+		description: "תזונה מדויקת המבוססת על מחקר — מותאמת לשלב בחיים, גודל הגזע, ומצב הבריאות של הכלב שלך.",
 		slug: 'teeth',
 		emoji: '🛁',
 		...collectionDefaults,
@@ -308,7 +314,7 @@ const collections: Record<string, Collection> = {
 				leash: {
 		id: 'leash',
 		name: 'רצועות',
-		description: 'Wear your love for Astro on your sleeve.',
+		description: "תזונה מדויקת המבוססת על מחקר — מותאמת לשלב בחיים, גודל הגזע, ומצב הבריאות של הכלב שלך.",
 		slug: 'leash',
 		emoji: '🦮',
 		...collectionDefaults,

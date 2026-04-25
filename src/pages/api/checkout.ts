@@ -1,74 +1,161 @@
-import type { APIRoute } from 'astro';
-import Stripe from 'stripe';
-import { z } from 'zod';
-import { loadCartFromCookies } from '~/features/cart/cart.server.ts';
-import type { stripeProductMetadataSchema } from '~/lib/products.ts';
+import type { APIRoute } from "astro"
+
+import { z } from "zod"
+
+import { loadCartFromCookies }
+  from "~/features/cart/cart.server"
+
 import {
-	INTERNATIONAL_SHIPPING_RATE_ID,
-	STRIPE_SECRET_KEY,
-	US_SHIPPING_RATE_ID,
-} from 'astro:env/server';
+  fetchStockForProduct
+} from "~/lib/boss-client"
 
-export const POST: APIRoute = async (context) => {
-	const cart = await loadCartFromCookies(context.cookies);
+export const prerender = false; // Add this line
 
-	// TODO: we probably want to check here the stock of items/variants
-	// because they could be in the checkout screen _while_ the last thing was being ordered,
-	// then get an error after submitting payment
+/*
+request body schema
+מונע unknown
+*/
 
-	const stripe = new Stripe(STRIPE_SECRET_KEY);
+const checkoutSchema = z.object({
 
-	const countrySpecs = await stripe.countrySpecs.retrieve('US');
+  email:
+    z.string().email(),
 
-	const session = await stripe.checkout.sessions.create({
-		mode: 'payment',
-		line_items: cart.items.map<Stripe.Checkout.SessionCreateParams.LineItem>((item) => {
-			const metadata: z.input<typeof stripeProductMetadataSchema> = {
-				productVariantId: item.productVariantId,
-				// some simple metadata for identification
-				productName: item.productVariant.product.name,
-				productId: item.productVariant.product.id,
-				variantName: item.productVariant.name,
-				variantId: item.productVariant.id,
-			};
-			return {
-				price_data: {
-					currency: 'usd',
-					product_data: {
-						name: item.productVariant.product.name,
-						description:
-							item.productVariant.product.description ||
-							item.productVariant.product.tagline ||
-							undefined,
-						images: [new URL(item.productVariant.product.imageUrl, context.url).href],
-						metadata,
-					},
-					unit_amount: item.productVariant.product.price - item.productVariant.product.discount,
-				},
-				quantity: item.quantity,
-			};
-		}),
-		success_url: new URL('/api/checkout/success?session_id={CHECKOUT_SESSION_ID}', context.url)
-			.href,
-		cancel_url: new URL('/', context.url).href,
-		shipping_address_collection: {
-			allowed_countries:
-				countrySpecs.supported_transfer_countries as Stripe.Checkout.SessionCreateParams.ShippingAddressCollection.AllowedCountry[],
-		},
-		shipping_options: [
-			{ shipping_rate: US_SHIPPING_RATE_ID },
-			{ shipping_rate: INTERNATIONAL_SHIPPING_RATE_ID },
-		],
-		phone_number_collection: {
-			enabled: true,
-		},
-	});
+  phone:
+    z.string().min(5),
 
-	if (!session.url) {
-		throw new Error('Failed to create Stripe checkout session', {
-			cause: session,
-		});
-	}
+  name:
+    z.string().min(2),
 
-	return context.redirect(session.url, 303);
-};
+  address:
+    z.string().min(3)
+})
+
+
+
+type BossStockResponse = {
+
+  Results?: {
+
+    ProductInfo?: {
+      UniqueId: number
+    }
+
+    BranchInfo?: {
+
+      UniqueId: number
+
+      StorageAmounts?: {
+
+        Current?: number
+      }
+    }
+
+  }[]
+}
+
+
+
+export const POST: APIRoute = async ({ cookies, request }) => {
+  console.log("Full Headers:", Object.fromEntries(request.headers.entries()));
+  const clonedRequest = request.clone();
+  console.log("Raw Body Text:", await clonedRequest.text());
+  const cart = await loadCartFromCookies(cookies);
+
+ 
+  // Check if the content-type is actually JSON
+  const contentType = request.headers.get("content-type");
+  if (!contentType || !contentType.includes("application/json")) {
+    return new Response(JSON.stringify({ error: "Invalid Content-Type" }), { status: 400 });
+  }
+
+  let body;
+  try {
+    body = await request.json();
+    const validatedBody = checkoutSchema.parse(body);
+  } catch (e) {
+    return new Response(JSON.stringify({ error: "Invalid JSON or Validation Failed" }), { status: 400 });
+  }
+
+
+
+  /*
+  stock validation
+  */
+
+  for (const item of cart.items) {
+
+    const productId =
+      Number(
+        item.productVariant.product.id
+      )
+
+    if (
+      Number.isNaN(productId)
+    ) {
+
+      return new Response(
+
+        JSON.stringify({
+
+          error:
+            "invalid product id"
+        }),
+
+        { status: 400 }
+      )
+    }
+
+
+
+    const stock =
+      await fetchStockForProduct(
+        productId
+      ) as BossStockResponse
+
+
+
+    const available =
+      stock.Results?.[0]
+        ?.BranchInfo
+        ?.StorageAmounts
+        ?.Current ?? 0
+
+
+
+    if (
+      available <
+      item.quantity
+    ) {
+
+      return new Response(
+
+        JSON.stringify({
+
+          error:
+            `not enough stock for ${item.productVariant.product.name}`
+        }),
+
+        { status: 400 }
+      )
+    }
+  }
+
+
+
+  /*
+  TEMP:
+  עד שנחבר createOrder אמיתי
+  רק מחזירים הצלחה
+  */
+
+  return new Response(
+
+    JSON.stringify({
+
+      ok: true
+    }),
+
+    { status: 200 }
+  )
+}

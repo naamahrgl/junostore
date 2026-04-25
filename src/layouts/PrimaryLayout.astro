@@ -24,7 +24,7 @@ type Props = {
 const { title } = Astro.props;
 ---
 
-<html lang="en" class="overflow-x-clip bg-theme-base-200 text-theme-base-900">
+<html lang="en" class="overflow-x-clip bg-white text-theme-base-900">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -46,11 +46,11 @@ const { title } = Astro.props;
 	</head>
 	<body class="content-grid min-h-screen font-sans" dir="rtl">
 		<SiteRibbon />
-		<div class={`breakout w-full border-theme-base-300`}></div>
+		<div class={`breakout w-full `}></div>
 		<SiteHeader />
-		<div class={`breakout border-b w-full border-theme-base-300`}></div>
+		<div class={`breakout  w-full `}></div>
 		<slot />
-		<div class="breakout pt-48">
+		<div class="breakout ">
 			<SiteFooter />
 		</div>
 		{import.meta.env.DEV && <SolidQueryDevtools client:idle />}

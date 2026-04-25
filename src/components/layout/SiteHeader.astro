@@ -10,10 +10,10 @@ export interface Props extends HTMLAttributes<'nav'> {}
 
 const { class: className, ...props } = Astro.props;
 ---
-<header class="breakout relative    bg-[var(--accent)] flex flex-row  items-center justify-between  ">
+<header class="breakout relative   bg-theme-base-600 flex flex-row  items-center justify-between  ">
 <div
 	aria-label="Site navigation"
-	class:list={["breakout px-4 flex items-center  justify-between flex-row-reverse bg-theme-base-600 ", className]}
+	class:list={["breakout px-2 flex items-center  justify-between flex-row-reverse bg-theme-base-600 ", className]}
 	{...props}
 >
 

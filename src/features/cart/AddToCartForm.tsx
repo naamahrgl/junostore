@@ -139,16 +139,16 @@ export function AddToCartForm(props: { product: Product }) {
 					}
 				>
 					<Match when={Object.keys(selectedOptions()).length < productOptionValues().size}>
-						<p class="h-12">Choose a style.</p>
+						<p class="h-12"> בחרו</p>
 					</Match>
 					<Match when={selectedVariant() == null}>
-						<p class="h-12">This style is unavailable.</p>
+						<p class="h-12">הפריט אינו זמין</p>
 					</Match>
 					<Match when={selectedVariant()?.stock === 0}>
-						<p class="h-12">This style is out of stock.</p>
+						<p class="h-12">הפריט אינו זמין במלאי</p>
 					</Match>
 					<Match when={quantity() > getVariantStock(selectedVariant())}>
-						<p class="h-12">Only {getVariantStock(selectedVariant())} left in stock.</p>
+						<p class="h-12">רק {getVariantStock(selectedVariant())} נותרו במלאי</p>
 					</Match>
 				</Switch>
 			</div>

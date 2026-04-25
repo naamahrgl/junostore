@@ -8,7 +8,6 @@ import PrimaryLayout from '~/layouts/PrimaryLayout.astro';
 import SideColumnLayout from '~/layouts/SideColumnLayout.astro';
 import { getProductStock } from '~/lib/products.ts';
 import { unwrap } from '~/lib/util.ts';
-import { button } from '~/styles.ts';
 
 const searchParams = Object.fromEntries(Astro.url.searchParams);
 
@@ -89,8 +88,21 @@ filteredProducts =
 ---
 
 <PrimaryLayout title={`Astro Shop | ${collection.name}`}>
-	<!-- pagination -->
+	<h1 class="h2 text-6xl text-theme-base-600 mt-6">
 
+						{collection.name}
+
+</h1>
+	<h1 class="h3 text-xl text-theme-base-600 ">
+
+						{collection.description}
+
+</h3>
+<div class="flex flex-row  items-center justify-between">
+	<!-- pagination -->
+<div class="flex text-xl ">
+						{products.length} מוצרים
+</div>
 <div
 class="
 flex
@@ -145,25 +157,18 @@ ${page === i+1
 })
 
 }
+</div>
 
 </div>
 	<div class="pt-4">
 		
-		<SideColumnLayout class="flex flex-wrap gap-4">
-			<div slot="aside" class="flex flex-col gap-4 py-4">
-				<header>
-					<h2 class="text-2xl font-bold">
-						{collection.name}
-					</h2>
-					<p class="text-sm font-medium text-slate-600">
-						{products.length} מוצרים
-					</p>
-				</header>
+		<SideColumnLayout class="flex flex-wrap gap-4 ">
+			<div slot="aside" class="flex flex-col gap-4 py-4 text-xl">
+			
 <nav class="flex flex-col gap-2" aria-labelledby="sort-by-heading">
 
 <h3 id="sort-by-heading" class="font-semibold">
-Sort by
-</h3>
+סדר לפי מחיר</h3>
 
 <ul class="contents">
 
@@ -171,7 +176,7 @@ Sort by
 
 <CheckboxLink
 href={buildSortUrl('price','asc')}
-label="Price: Low to High"
+label="נמוך לגבוה"
 checked={sort === 'price' && order === 'asc'}
 />
 
@@ -181,7 +186,7 @@ checked={sort === 'price' && order === 'asc'}
 
 <CheckboxLink
 href={buildSortUrl('price','desc')}
-label="Price: High to Low"
+label="גבוה לנמוך"
 checked={sort === 'price' && order === 'desc'}
 />
 
@@ -192,9 +197,15 @@ checked={sort === 'price' && order === 'desc'}
 </nav>
 				<nav class="flex flex-col gap-2" aria-labelledby="filter-heading">
 
-<h3 id="filter-heading" class="font-semibold">
+
+<details class="group  w-full gap-2">
+  <summary class="list-none flex items-center justify-center gap-2 p-3 border rounded-xl cursor-pointer bg-white text-theme-base-50 font-bold">
+   <h3 id="filter-heading" class="font-semibold">
 פילטרים
 </h3>
+    <span class="transition-transform group-open:rotate-180">▼</span>
+  </summary>
+  
 
 <ul class="contents">
 
@@ -213,28 +224,16 @@ params.append('tags', tag);
 
 return (
 
-<li>
+  <div class="flex flex-wrap gap-2 justify-center  p-1  ">
+      <a href={`?${params.toString()}`}  class={`px-3 py-1 border rounded-xl ${isActive ? "bg-theme-base-200 text-theme-base-50" : "border-theme-base-50 "}`}>
 
-<a href={`?${params.toString()}`}>
-
-<button
-class={`
-${button({ theme:'ghost' })}
-
-${isActive
-  ? "bg-theme-base-100 text-theme-base-50 border-theme-base-100"
-  : ""
-}
-`}
->
 
 {tag}
 
-</button>
 
 </a>
 
-</li>
+</div>
 
 );
 
@@ -242,15 +241,19 @@ ${isActive
 }
 
 </ul>
+</details>
 
 </nav>
+
 			</div>
+			
 
 <section
   slot="main"
-  class="grid grid-cols-2 md:grid-cols-3 gap-6" 
+  class="grid grid-cols-2 md:grid-cols-3 gap-6 items-stretch" 
   aria-label="Products"
 >
+
   {filteredProducts.map((product: any) => (
     <ProductCard {...product} />
   ))}

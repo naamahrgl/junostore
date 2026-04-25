@@ -21,11 +21,11 @@ const { heading1= ' מה אתם', heading2= ' מחפשים?', subheading = 'קט
 		<div class='flex flex-row justify-start'>
 		<PageSubHeading id={HEADING_ID} class='text-theme-base-600 ' >{subheading}</PageSubHeading>
 		</div>
-	<div class='flex flex-row gap-3  justify-start'>
+	<div class='flex flex-row  justify-start'>
 			<PageHeading id={HEADING_ID} class='text-theme-base-300' >{heading1}</PageHeading>
 	<PageHeading id={HEADING_ID} class='text-theme-base-600 '>{heading2}</PageHeading>
 </div>
-	<div class="grid gap-px  sm:grid-cols-[repeat(auto-fit,minmax(16rem,1fr))] mt-20">
+	<div class="grid gap-px  sm:grid-cols-[repeat(auto-fit,minmax(16rem,1fr))] mb-6">
 		{
 			collections.map(
 				(collection, index) =>

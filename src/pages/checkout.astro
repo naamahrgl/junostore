@@ -17,7 +17,7 @@ const subtotal =
     (sum, item) =>
       sum +
       item.quantity *
-      Number(item.productVariant.product.price),
+      Number(item.productVariant.product.price) / 100,
 
     0
   )
@@ -100,7 +100,7 @@ const subtotal =
 
 {(
 Number(
-item.productVariant.product.price
+item.productVariant.product.price / 100
 ) *
 item.quantity
 ).toFixed(2)} ₪
@@ -132,7 +132,7 @@ item.quantity
 
 <span>
 
-{subtotal.toFixed(2)} ₪
+{subtotal.toFixed(2)}  ₪
 
 </span>
 
@@ -329,7 +329,7 @@ item.quantity
   "
 >
 
-כאן תתחבר סליקת BOS בהמשך
+כאן תתחבר סליקה בהמשך
 
 </p>
 
@@ -358,6 +358,7 @@ item.quantity
 
 </form>
 
+
 </div>
 
 </div>
@@ -366,97 +367,6 @@ item.quantity
 
 
 
-<script>
-
-const form =
-document.querySelector<HTMLFormElement>(
-"#checkout-form"
-)
-
-const msg =
-document.querySelector<HTMLParagraphElement>(
-"#checkout-msg"
-)
-
-
-if(form && msg){
-
-form.addEventListener(
-"submit",
-
-async e => {
-
-e.preventDefault()
-
-msg.textContent =
-"שולח..."
-
-
-const formData =
-new FormData(form)
-
-const data =
-Object.fromEntries(
-formData.entries()
-)
-
-
-const res =
-await fetch(
-
-"/api/checkout",
-
-{
-method: "POST",
-
-headers:{
-"Content-Type":
-"application/json"
-},
-
-body:
-JSON.stringify(data)
-}
-)
-
-
-/*
-טיפוס בטוח ל-response
-*/
-
-type ApiResponse = {
-
-ok?: boolean
-
-error?: string
-
-}
-
-
-const json =
-await res.json() as ApiResponse
-
-
-
-if(res.ok){
-
-msg.textContent =
-"ההזמנה התקבלה ✔"
-
-form.reset()
-
-}else{
-
-msg.textContent =
-json.error ??
-"שגיאה בשליחת ההזמנה"
-
-}
-
-})
-}
-
-</script>
 
 
 <style>
@@ -486,3 +396,47 @@ min-h-[120px]
 
 
 </PrimaryLayout>
+<script is:inline>
+  (function() {
+    const form = document.querySelector('#checkout-form');
+    const msg = document.querySelector("#checkout-msg");
+
+    if (form) {
+      form.onsubmit = async function(e) {
+        e.preventDefault(); // Stop the "black screen" navigation
+        
+        if (msg) msg.textContent = "בודק מלאי ושולח הזמנה...";
+
+        // Collect the form data
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+
+        try {
+          // Send the data to your API/checkout route
+          const res = await fetch("/api/checkout", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify(data)
+          });
+
+          const result = await res.json();
+
+          if (res.ok) {
+            if (msg) msg.textContent = "ההזמנה התקבלה בהצלחה! ✔";
+            form.reset();
+            // Optional: redirect to a "Thank You" page here
+          } else {
+            // Show the specific error (like "not enough stock")
+            if (msg) msg.textContent = result.error || "שגיאה בשליחת ההזמנה";
+          }
+        } catch (err) {
+          if (msg) msg.textContent = "שגיאת תקשורת. בדקו את החיבור לאינטרנט.";
+        }
+        
+        return false;
+      };
+    }
+  })();
+</script>
